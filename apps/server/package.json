@@ -7,7 +7,9 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
-    "hono": "^4.10.4"
+    "@hono/trpc-server": "^0.4.0",
+    "hono": "^4.10.4",
+    "@repo/trpc": "workspace:*"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
