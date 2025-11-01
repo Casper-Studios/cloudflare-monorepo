@@ -1,7 +1,7 @@
-import { baseProcedure, createTRPCRouter } from "../lib";
+import { publicProcedure, createTRPCRouter } from "../lib";
 
 export const authRouter = createTRPCRouter({
-  getUser: baseProcedure.query(async ({ ctx }) => {
+  getUser: publicProcedure.query(async ({ ctx }) => {
     return {
       id: "1",
       name: "John Doe",

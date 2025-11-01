@@ -1,10 +1,5 @@
-import { initTRPC } from "@trpc/server";
 import { authRouter } from "./auth";
-
-const t = initTRPC.create();
-
-export const publicProcedure = t.procedure;
-const createTRPCRouter = t.router;
+import { createTRPCRouter } from "../lib";
 
 export const appRouter = createTRPCRouter({
   auth: authRouter,
