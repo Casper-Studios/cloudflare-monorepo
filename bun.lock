@@ -40,23 +40,6 @@
         "wrangler": "^4.4.0",
       },
     },
-    "packages/eslint-config": {
-      "name": "@repo/eslint-config",
-      "version": "0.0.0",
-      "devDependencies": {
-        "@eslint/js": "^9.34.0",
-        "@next/eslint-plugin-next": "^15.5.0",
-        "eslint": "^9.38.0",
-        "eslint-config-prettier": "^10.1.1",
-        "eslint-plugin-only-warn": "^1.1.0",
-        "eslint-plugin-react": "^7.37.5",
-        "eslint-plugin-react-hooks": "^5.2.0",
-        "eslint-plugin-turbo": "^2.5.0",
-        "globals": "^16.3.0",
-        "typescript": "^5.9.2",
-        "typescript-eslint": "^8.40.0",
-      },
-    },
     "packages/trpc": {
       "name": "@repo/trpc",
       "dependencies": {
@@ -69,10 +52,6 @@
       "peerDependencies": {
         "typescript": "^5",
       },
-    },
-    "packages/typescript-config": {
-      "name": "@repo/typescript-config",
-      "version": "0.0.0",
     },
     "packages/ui": {
       "name": "@repo/ui",
@@ -90,6 +69,27 @@
         "eslint": "^9.38.0",
         "typescript": "5.9.2",
       },
+    },
+    "tooling/eslint-config": {
+      "name": "@repo/eslint-config",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@eslint/js": "^9.34.0",
+        "@next/eslint-plugin-next": "^15.5.0",
+        "eslint": "^9.38.0",
+        "eslint-config-prettier": "^10.1.1",
+        "eslint-plugin-only-warn": "^1.1.0",
+        "eslint-plugin-react": "^7.37.5",
+        "eslint-plugin-react-hooks": "^5.2.0",
+        "eslint-plugin-turbo": "^2.5.0",
+        "globals": "^16.3.0",
+        "typescript": "^5.9.2",
+        "typescript-eslint": "^8.40.0",
+      },
+    },
+    "tooling/typescript-config": {
+      "name": "@repo/typescript-config",
+      "version": "0.0.0",
     },
   },
   "packages": {
@@ -273,11 +273,11 @@
 
     "@poppinss/exception": ["@poppinss/exception@1.2.2", "", {}, "sha512-m7bpKCD4QMlFCjA/nKTs23fuvoVFoA83brRKmObCUNmi/9tVu8Ve3w4YQAnJu4q3Tjf5fr685HYIC/IA2zHRSg=="],
 
-    "@repo/eslint-config": ["@repo/eslint-config@workspace:packages/eslint-config"],
+    "@repo/eslint-config": ["@repo/eslint-config@workspace:tooling/eslint-config"],
 
     "@repo/trpc": ["@repo/trpc@workspace:packages/trpc"],
 
-    "@repo/typescript-config": ["@repo/typescript-config@workspace:packages/typescript-config"],
+    "@repo/typescript-config": ["@repo/typescript-config@workspace:tooling/typescript-config"],
 
     "@repo/ui": ["@repo/ui@workspace:packages/ui"],
 
