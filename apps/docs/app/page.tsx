@@ -1,3 +1,4 @@
+
 import Image, { type ImageProps } from "next/image";
 import { Button } from "@repo/ui/button";
 import styles from "./page.module.css";
@@ -18,7 +19,16 @@ const ThemeImage = (props: Props) => {
   );
 };
 
-export default function Home() {
+export default async function Home() {
+
+  const fetchFromHono = async () => {
+    const response = await fetch("http://localhost:8787");
+    const text = await response.text();
+    return text;
+  };
+
+  const dat = await fetchFromHono();
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -33,9 +43,8 @@ export default function Home() {
         />
         <ol>
           <li>
-            Get started by editing <code>apps/docs/app/page.tsx</code>
+            {dat}
           </li>
-          <li>Save and see your changes instantly.</li>
         </ol>
 
         <div className={styles.ctas}>
@@ -66,6 +75,7 @@ export default function Home() {
         <Button appName="docs" className={styles.secondary}>
           Open alert
         </Button>
+
       </main>
       <footer className={styles.footer}>
         <a
