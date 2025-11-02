@@ -4,14 +4,18 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "db:copy-migrations": "rm -rf migrations && cp -r ../../packages/db/drizzle migrations",
+    "db:migrate:local": "yes | wrangler d1 migrations apply my-database --local"
   },
   "dependencies": {
     "@hono/trpc-server": "^0.4.0",
     "hono": "^4.10.4",
+    "@repo/db": "workspace:*",
     "@repo/trpc": "workspace:*"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251014.0",
     "@repo/typescript-config": "workspace:*",
     "wrangler": "^4.4.0"
   }

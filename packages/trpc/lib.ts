@@ -1,7 +1,7 @@
 import { initTRPC } from "@trpc/server";
 
 // import type { Auth } from "@acme/auth";
-// import { db } from "@acme/db/client";
+import { getDb } from "@repo/db";
 
 // /**
 //  * 1. CONTEXT
@@ -31,8 +31,8 @@ import { initTRPC } from "@trpc/server";
 //   };
 // };
 
-type TRPCContext = {
-  headers: Headers;
+export type TRPCContext = {
+  db: Awaited<ReturnType<typeof getDb>>;
 };
 
 const t = initTRPC.context<TRPCContext>().create();

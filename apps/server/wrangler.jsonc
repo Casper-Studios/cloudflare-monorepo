@@ -2,19 +2,15 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "my-app",
   "main": "src/index.ts",
-  "compatibility_date": "2025-11-01"
-  // "compatibility_flags": [
-  //   "nodejs_compat"
-  // ],
-  // "vars": {
-  //   "MY_VAR": "my-variable"
-  // },
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "MY_KV_NAMESPACE",
-  //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  //   }
-  // ],
+  "compatibility_date": "2025-11-01",
+  "d1_databases": [
+    {
+      "binding": "DATABASE",
+      "database_name": "my-database",
+      "database_id": "b60ebaaa-93e2-475f-b25b-f302a8c88447",
+      "migrations_dir": "migrations"
+    }
+  ]
   // "r2_buckets": [
   //   {
   //     "binding": "MY_BUCKET",
