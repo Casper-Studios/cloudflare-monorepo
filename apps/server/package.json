@@ -1,5 +1,5 @@
 {
-  "name": "my-app",
+  "name": "server",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
