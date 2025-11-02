@@ -1,0 +1,69 @@
+# Introduction
+
+Welcome to the Cloudflare monorepo documentation. This project is a full-stack application built with Next.js for the frontend and Cloudflare Workers for the backend.
+
+## Getting Started
+
+### Prerequisites
+
+- [Bun](https://bun.sh/) v1.3.0 or higher
+- Node.js 18 or higher
+
+### Installation
+
+First, install all dependencies:
+
+```bash
+bun install
+```
+
+### Development
+
+Start all apps in development mode:
+
+```bash
+bun run dev
+```
+
+The dev command will:
+1. Copy database migrations from `packages/db/drizzle` to `apps/server/migrations`
+2. Apply migrations to your local D1 database
+3. Start all apps in parallel:
+   - **Docs app** (Next.js) - typically at `http://localhost:3000`
+   - **Server** (Cloudflare Workers) - typically at `http://localhost:8787`
+
+That's it! Everything you need runs automatically.
+
+## Available Scripts
+
+- `bun run dev` - Start all apps in development mode
+- `bun run build` - Build all apps for production
+- `bun run lint` - Run linters across all packages
+- `bun run format` - Format code with Prettier
+- `bun run check-types` - Type check all TypeScript files
+- `bun run db:generate` - Generate database migrations
+- `bun run db:studio` - Open Drizzle Studio for database management
+- `bun run db:migrate:local` - Apply migrations to local database
+- `bun run db:migrate:remote` - Apply migrations to remote database
+- `bun run db:list` - List all migrations
+
+## Project Structure
+
+This is a monorepo managed by Turbo.
+
+### Apps
+
+- **`apps/docs`** - Next.js documentation site with MDX support
+- **`apps/server`** - Cloudflare Workers API server
+
+### Packages
+
+- **`packages/auth`** - Authentication utilities with better-auth
+- **`packages/db`** - Database schema and Drizzle ORM configuration
+- **`packages/trpc`** - tRPC routers and API definitions
+- **`packages/ui`** - Shared UI components
+
+### Tooling
+
+- **`tooling/`** - Shared ESLint and TypeScript configurations
+
