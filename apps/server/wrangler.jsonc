@@ -3,12 +3,21 @@
   "name": "my-app",
   "main": "src/index.ts",
   "compatibility_date": "2025-11-01",
+  "dev": {
+    "port": 3000
+  },
   "d1_databases": [
     {
       "binding": "DATABASE",
       "database_name": "my-database",
       "database_id": "b60ebaaa-93e2-475f-b25b-f302a8c88447",
       "migrations_dir": "migrations"
+    }
+  ],
+  "services": [
+    {
+      "binding": "WORKFLOWS",
+      "service": "workflows-starter"
     }
   ]
   // "r2_buckets": [

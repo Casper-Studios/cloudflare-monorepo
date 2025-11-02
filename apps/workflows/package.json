@@ -5,6 +5,10 @@
 		"dev": "wrangler dev",
 		"deploy": "wrangler deploy"
 	},
+	"dependencies": {
+		"@repo/schemas": "workspace:*",
+		"zod": "^3.24.1"
+	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250417.0",
 		"typescript": "^5.0.4",

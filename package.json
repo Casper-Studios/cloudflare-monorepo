@@ -4,6 +4,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:workflows": "cd apps/workflows && wrangler dev --port 8788",
+    "dev:server": "cd apps/server && wrangler dev --port 8787",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",

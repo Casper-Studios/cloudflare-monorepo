@@ -10,9 +10,12 @@
   },
   "dependencies": {
     "@hono/trpc-server": "^0.4.0",
-    "hono": "^4.10.4",
+    "@hono/zod-openapi": "^1.1.4",
     "@repo/db": "workspace:*",
-    "@repo/trpc": "workspace:*"
+    "@repo/schemas": "workspace:*",
+    "@repo/trpc": "workspace:*",
+    "@scalar/hono-api-reference": "^0.9.22",
+    "hono": "^4.10.4"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251014.0",
