@@ -23,7 +23,9 @@ export class ExampleWorkflow extends WorkflowEntrypoint<
     await step.sleep("sleep for a bit", "1 minute");
 
     const db = await getDb(this.env.DATABASE);
-    const user = await userRepository.getUser(db, { id: 1 });
+    const user = await userRepository.getUser(db, {
+      id: "9XzMxcbWxKqNsAMqnsnsiH0qsyHdjJ6S",
+    });
 
     console.log("Workflow finished", user);
 

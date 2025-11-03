@@ -8,9 +8,9 @@ import { getAuth } from "./auth";
 const app = createRouter();
 
 app.use(
-  "/api/auth/*", // or replace with "*" to enable cors for all routes
+  "*",
   cors({
-    origin: "http://localhost:3001", // replace with your origin
+    origin: ["http://localhost:3001"],
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
