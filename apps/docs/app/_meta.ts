@@ -1,7 +1,4 @@
 export default {
-  index: "Introduction",
-  discovery: "Discovery",
-  design: "Design",
-  development: "Development",
-  meetings: "Meetings",
+  index: "Home",
+  "phase-0-mvp": "Phase 0 - MVP",
 };
