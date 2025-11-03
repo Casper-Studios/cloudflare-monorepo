@@ -2,6 +2,7 @@ import { Scalar } from "@scalar/hono-api-reference";
 import { workflowsRouter } from "./routers/workflows";
 import { trpcRouter } from "./routers/trpc";
 import { createRouter } from "./lib";
+import { auth } from "./auth";
 
 const app = createRouter();
 
@@ -23,7 +24,10 @@ app
       theme: "default",
       pageTitle: "Cloudflare Server API Documentation",
     })
-  );
+  )
+  .on(["POST", "GET"], "/auth/*", (c) => {
+    return auth.handler(c.req.raw);
+  });
 
 export { ExampleWorkflow } from "./workflows/example";
 

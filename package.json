@@ -9,7 +9,7 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "db:generate": "turbo run db:generate",
+    "db:generate": "cd packages/db && bun run db:generate",
     "db:studio": "cd packages/db && bun run db:studio",
     "db:copy-migrations": "rm -rf apps/server/migrations && cp -r packages/db/drizzle apps/server/migrations",
     "db:migrate:local": "bun run db:copy-migrations && cd apps/server && wrangler d1 migrations apply my-database --local",

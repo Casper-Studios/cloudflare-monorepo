@@ -1,7 +1,11 @@
 {
-  "name": "auth",
+  "name": "@repo/auth",
   "module": "index.ts",
   "type": "module",
+  "dependencies": {
+    "better-auth": "^1.3.34",
+    "@repo/db": "workspace:*"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@repo/typescript-config": "workspace:*",

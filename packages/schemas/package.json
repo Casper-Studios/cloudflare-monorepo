@@ -6,7 +6,9 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@repo/typescript-config": "workspace:*",
+    "@repo/eslint-config": "workspace:*"
   },
   "peerDependencies": {
     "typescript": "^5"

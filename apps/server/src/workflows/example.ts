@@ -1,4 +1,3 @@
-import { WorkflowTriggerRequest } from "@repo/schemas";
 import {
   WorkflowEntrypoint,
   WorkflowEvent,
@@ -8,11 +7,18 @@ import { Bindings } from "../lib";
 import { userRepository } from "@repo/repositories";
 import { getDb } from "@repo/db";
 
+export interface ExampleWorkflowRequestPayload {
+  email: string;
+  metadata: Record<string, string>;
+}
 export class ExampleWorkflow extends WorkflowEntrypoint<
   Bindings,
-  WorkflowTriggerRequest
+  ExampleWorkflowRequestPayload
 > {
-  async run(event: WorkflowEvent<WorkflowTriggerRequest>, step: WorkflowStep) {
+  async run(
+    event: WorkflowEvent<ExampleWorkflowRequestPayload>,
+    step: WorkflowStep
+  ) {
     console.log("Workflow started", event);
     await step.sleep("sleep for a bit", "1 minute");
 

@@ -6,16 +6,19 @@
     "deploy": "wrangler deploy --minify",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "db:copy-migrations": "rm -rf migrations && cp -r ../../packages/db/drizzle migrations",
-    "db:migrate:local": "yes | wrangler d1 migrations apply my-database --local"
+    "db:migrate:local": "yes | wrangler d1 migrations apply my-database --local",
+    "auth:generate": "IS_CLI=true bunx @better-auth/cli generate"
   },
   "dependencies": {
     "@hono/trpc-server": "^0.4.0",
     "@hono/zod-openapi": "^1.1.4",
+    "@repo/auth": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/repositories": "workspace:*",
     "@repo/schemas": "workspace:*",
     "@repo/trpc": "workspace:*",
     "@scalar/hono-api-reference": "^0.9.22",
+    "better-auth": "^1.3.34",
     "hono": "^4.10.4"
   },
   "devDependencies": {

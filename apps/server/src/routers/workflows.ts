@@ -1,12 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
-import {
-  WorkflowTriggerRequestSchema,
-  WorkflowTriggerResponseSchema,
-  WorkflowStatusResponseSchema,
-} from "@repo/schemas";
 import { createRouter } from "../lib";
 
-const WorkflowTriggerRequestSchemaOpenAPI = z
+const WorkflowTriggerRequestSchema = z
   .object({
     email: z.string().email().openapi({
       example: "user@example.com",
@@ -23,7 +18,7 @@ const WorkflowTriggerRequestSchemaOpenAPI = z
   })
   .openapi("WorkflowTriggerRequest");
 
-const WorkflowTriggerResponseSchemaOpenAPI = z
+const WorkflowTriggerResponseSchema = z
   .object({
     success: z.boolean().openapi({
       example: true,
@@ -37,37 +32,7 @@ const WorkflowTriggerResponseSchemaOpenAPI = z
   })
   .openapi("WorkflowTriggerResponse");
 
-const WorkflowStatusParamsSchemaOpenAPI = z
-  .object({
-    instanceId: z
-      .string()
-      .min(1)
-      .openapi({
-        param: {
-          name: "instanceId",
-          in: "path",
-        },
-        example: "workflow-123",
-        description: "The unique identifier for the workflow instance",
-      }),
-  })
-  .openapi("WorkflowStatusParams");
-
-const WorkflowStatusResponseSchemaOpenAPI = z
-  .object({
-    success: z.boolean().openapi({
-      example: true,
-    }),
-    status: z.any().openapi({
-      description: "Workflow status",
-    }),
-    instance: z.any().openapi({
-      description: "Workflow instance details",
-    }),
-  })
-  .openapi("WorkflowStatusResponse");
-
-const ErrorResponseSchemaOpenAPI = z
+const ErrorResponseSchema = z
   .object({
     success: z.boolean().openapi({
       example: false,
@@ -89,7 +54,7 @@ const ErrorResponseSchemaOpenAPI = z
   })
   .openapi("ErrorResponse");
 
-export const workflowsRouter = createRouter();
+const workflowsRouter = createRouter();
 
 workflowsRouter.openapi(
   createRoute({
@@ -100,7 +65,7 @@ workflowsRouter.openapi(
       body: {
         content: {
           "application/json": {
-            schema: WorkflowTriggerRequestSchemaOpenAPI,
+            schema: WorkflowTriggerRequestSchema,
           },
         },
         required: true,
@@ -110,7 +75,7 @@ workflowsRouter.openapi(
       200: {
         content: {
           "application/json": {
-            schema: WorkflowTriggerResponseSchemaOpenAPI,
+            schema: WorkflowTriggerResponseSchema,
           },
         },
         description: "Successfully triggered workflow",
@@ -118,7 +83,7 @@ workflowsRouter.openapi(
       400: {
         content: {
           "application/json": {
-            schema: ErrorResponseSchemaOpenAPI,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Validation error",
@@ -126,7 +91,7 @@ workflowsRouter.openapi(
       500: {
         content: {
           "application/json": {
-            schema: ErrorResponseSchemaOpenAPI,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Failed to trigger workflow",
@@ -164,3 +129,5 @@ workflowsRouter.openapi(
     }
   }
 );
+
+export { workflowsRouter };

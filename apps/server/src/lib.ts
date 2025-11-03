@@ -1,9 +1,10 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { WorkflowTriggerRequest } from "@repo/schemas";
+import { Auth } from "@repo/auth";
+import { ExampleWorkflowRequestPayload } from "./workflows/example";
 
-export interface Bindings {
+export interface Bindings extends Auth {
   DATABASE: D1Database;
-  EXAMPLE_WORKFLOW: Workflow<WorkflowTriggerRequest>;
+  EXAMPLE_WORKFLOW: Workflow<ExampleWorkflowRequestPayload>;
 }
 
 export const createRouter = () => new OpenAPIHono<{ Bindings: Bindings }>();
