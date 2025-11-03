@@ -41,10 +41,11 @@ export function initAuth(
   return betterAuth(config);
 }
 
-// export type Auth = {
-//   user: ReturnType<typeof betterAuth>["$Infer"]["Session"]["user"] | null;
-//   session: ReturnType<typeof betterAuth>["$Infer"]["Session"]["session"] | null;
-// };
+export type Auth = {
+  user: ReturnType<typeof betterAuth>["$Infer"]["Session"]["user"] | null;
+  session: ReturnType<typeof betterAuth>["$Infer"]["Session"]["session"] | null;
+};
 
-export type Auth = ReturnType<typeof initAuth>;
-export type Session = Auth["$Infer"]["Session"];
+// export type Auth = ReturnType<typeof initAuth>;
+// export type Session = Auth["$Infer"]["Session"]["session"];
+// export type User = Auth["$Infer"]["Session"]["user"];

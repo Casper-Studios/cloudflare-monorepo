@@ -1,5 +1,5 @@
 'use client';
-// ^-- to make sure we can mount the Provider from a server component
+
 import type { QueryClient } from '@tanstack/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
@@ -9,6 +9,7 @@ import superjson from 'superjson';
 import { AppRouter } from '@repo/trpc/routers';
 
 import { createQueryClient } from './query-client';
+// import { getHeaders } from 'better-auth/react';
 
 export const api: ReturnType<typeof createTRPCReact<AppRouter>> = createTRPCReact<AppRouter>();
 
@@ -49,7 +50,19 @@ export function TRPCProvider(
         httpBatchLink({
           transformer: superjson,
           url: getUrl(),
+          fetch(url, options) {
+            return fetch(url, {
+              ...options,
+              credentials: 'include',
+            });
+          },
+          headers() {
+            return {
+              "x-trpc-source": "admin-app",
+            }
+          }
         }),
+
       ],
     }),
   );

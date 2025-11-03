@@ -14,7 +14,10 @@ trpcRouter.use(
     createContext: async (opts, c) => {
       return {
         database: await getDb(c.env.DATABASE),
-        auth: await getAuth(c.env.DATABASE),
+        auth: {
+          user: c.get("user"),
+          session: c.get("session"),
+        },
         headers: opts.req.headers,
       } satisfies TRPCContextOptions;
     },

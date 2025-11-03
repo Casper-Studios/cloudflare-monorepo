@@ -7,24 +7,24 @@ import type { Auth } from "@repo/auth";
 
 export interface TRPCContextOptions {
   headers: Headers;
-  auth: Auth;
+  auth: Auth | null;
   database: Awaited<ReturnType<typeof getDb>>;
 }
 
-export const createTRPCContext = async (opts: TRPCContextOptions) => {
-  const authApi = opts.auth.api;
-  const session = await authApi.getSession({
-    headers: opts.headers,
-  });
+// export const createTRPCContext = async (opts: TRPCContextOptions) => {
+//   const authApi = opts.auth.api;
+//   const session = await authApi.getSession({
+//     headers: opts.headers,
+//   });
 
-  return {
-    authApi,
-    session,
-    database: opts.database,
-  };
-};
+//   return {
+//     authApi,
+//     session,
+//     database: opts.database,
+//   };
+// };
 
-const t = initTRPC.context<typeof createTRPCContext>().create({
+const t = initTRPC.context<TRPCContextOptions>().create({
   transformer: superjson,
   errorFormatter: ({ shape, error }) => ({
     ...shape,
@@ -43,13 +43,12 @@ export const createCallerFactory = t.createCallerFactory;
 export const publicProcedure = t.procedure;
 
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
-  if (!ctx.session?.user) {
+  if (!ctx.auth?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({
     ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
+      auth: ctx.auth!,
     },
   });
 });

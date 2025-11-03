@@ -11,13 +11,36 @@ app.use(
   "*",
   cors({
     origin: ["http://localhost:3001"],
-    allowHeaders: ["Content-Type", "Authorization"],
+    // allowHeaders: [
+    //   "Content-Type",
+    //   "Authorization",
+    //   "x-trpc-source",
+    //   "data",
+    //   "token",
+    //   "session",
+    // ],
     allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
     credentials: true,
   })
 );
+
+app.use("*", async (c, next) => {
+  const auth = await getAuth(c.env.DATABASE);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
+  if (!session) {
+    c.set("user", null);
+    c.set("session", null);
+    await next();
+    return;
+  }
+
+  c.set("user", session.user);
+  c.set("session", session);
+  await next();
+});
 
 app.on(["POST", "GET"], "/api/auth/*", async (c) => {
   const auth = await getAuth(c.env.DATABASE);

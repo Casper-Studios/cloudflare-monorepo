@@ -9,11 +9,11 @@ import { authClient } from './lib/auth'
 function App() {
   const { data: session } = authClient.useSession()
 
-  const getUser = api.auth.getUser.useQuery({ id: "9XzMxcbWxKqNsAMqnsnsiH0qsyHdjJ6S" });
+  const getUser = api.auth.getUserProtected.useQuery({ id: "9XzMxcbWxKqNsAMqnsnsiH0qsyHdjJ6S" });
 
   async function createNewUser() {
     const result = await authClient.signUp.email({
-      email: "test23@test.com",
+      email: "test12345@test.com",
       password: "Password123!",
       name: "Test User",
     });
