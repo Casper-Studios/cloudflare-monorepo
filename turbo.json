@@ -26,6 +26,10 @@
     },
     "db:copy-migrations": {
       "dependsOn": ["^db:copy-migrations"]
+    },
+    "ui-add": {
+      "cache": false,
+      "interactive": true
     }
   }
 }

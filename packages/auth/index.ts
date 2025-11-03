@@ -23,11 +23,18 @@ export function initAuth(
         productionURL: options.productionUrl,
       }),
     ],
-    trustedOrigins: ["expo://"],
+    trustedOrigins: [
+      "expo://",
+      "http://localhost:3001",
+      "http://localhost:3000",
+    ],
     onAPIError: {
       onError(error, ctx) {
         console.error("BETTER AUTH API ERROR", error, ctx);
       },
+    },
+    emailAndPassword: {
+      enabled: true,
     },
   } satisfies BetterAuthOptions;
 
