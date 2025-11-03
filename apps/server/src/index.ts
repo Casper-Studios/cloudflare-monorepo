@@ -25,4 +25,6 @@ app
     })
   );
 
+export { ExampleWorkflow } from "./workflows/example";
+
 export default app;

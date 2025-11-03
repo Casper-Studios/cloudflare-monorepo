@@ -10,3 +10,5 @@ export async function getDb(database: AnyD1Database) {
     throw new Error("Failed to get database");
   }
 }
+
+export type Database = Awaited<ReturnType<typeof getDb>>;

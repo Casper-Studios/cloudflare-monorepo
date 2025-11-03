@@ -14,11 +14,12 @@
       "migrations_dir": "migrations"
     }
   ],
-  "services": [
+  "workflows": [
     {
-      "binding": "WORKFLOWS",
-      "service": "workflows-starter"
-    }
+      "binding": "EXAMPLE_WORKFLOW",
+      "name": "example-workflow",
+      "class_name": "ExampleWorkflow"
+    },
   ]
   // "r2_buckets": [
   //   {

@@ -1,12 +1,11 @@
 import { TRPCError } from "@trpc/server";
 
 import { publicProcedure, createTRPCRouter } from "../lib";
+import { userRepository } from "@repo/repositories";
 
 export const authRouter = createTRPCRouter({
   getUser: publicProcedure.query(async ({ ctx }) => {
-    const user = await ctx.db.query.usersTable.findFirst({
-      where: (usersTable, { eq }) => eq(usersTable.id, 1),
-    });
+    const user = await userRepository.getUser(ctx.db, { id: 1 });
 
     if (!user) {
       throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });

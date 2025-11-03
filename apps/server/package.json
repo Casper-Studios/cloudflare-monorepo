@@ -12,6 +12,7 @@
     "@hono/trpc-server": "^0.4.0",
     "@hono/zod-openapi": "^1.1.4",
     "@repo/db": "workspace:*",
+    "@repo/repositories": "workspace:*",
     "@repo/schemas": "workspace:*",
     "@repo/trpc": "workspace:*",
     "@scalar/hono-api-reference": "^0.9.22",

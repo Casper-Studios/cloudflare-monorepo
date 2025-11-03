@@ -16,7 +16,10 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["db:migrate:local"]
+      "dependsOn": ["cf-typegen", "db:migrate:local"]
+    },
+    "cf-typegen": {
+      "cache": false
     },
     "db:migrate:local": {
       "dependsOn": ["db:copy-migrations", "^db:migrate:local"]
