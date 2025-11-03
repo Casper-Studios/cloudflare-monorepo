@@ -1,11 +1,17 @@
 import { getDb } from "@repo/db";
-import { env } from "cloudflare:workers";
 import { initAuth } from "@repo/auth";
+import type { Bindings } from "./lib";
 
-const db = await getDb(env.DATABASE);
+let authInstance: ReturnType<typeof initAuth> | null = null;
 
-export const auth = initAuth(db, {
-  baseUrl: "http://localhost:3000",
-  productionUrl: "https://your-production-url.com",
-  secret: "secret",
-});
+export async function getAuth(env: Bindings["DATABASE"]) {
+  if (!authInstance) {
+    const db = await getDb(env);
+    authInstance = initAuth(db, {
+      baseUrl: "http://localhost:3000",
+      productionUrl: "https://your-production-url.com",
+      secret: "secret",
+    });
+  }
+  return authInstance;
+}
