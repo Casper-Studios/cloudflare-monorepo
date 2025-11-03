@@ -11,19 +11,6 @@ export interface TRPCContextOptions {
   database: Awaited<ReturnType<typeof getDb>>;
 }
 
-// export const createTRPCContext = async (opts: TRPCContextOptions) => {
-//   const authApi = opts.auth.api;
-//   const session = await authApi.getSession({
-//     headers: opts.headers,
-//   });
-
-//   return {
-//     authApi,
-//     session,
-//     database: opts.database,
-//   };
-// };
-
 const t = initTRPC.context<TRPCContextOptions>().create({
   transformer: superjson,
   errorFormatter: ({ shape, error }) => ({

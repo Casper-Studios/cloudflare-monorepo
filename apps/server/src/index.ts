@@ -28,17 +28,18 @@ app.use(
 
 app.use("*", async (c, next) => {
   const auth = await getAuth(c.env.DATABASE);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  const betterAuth = await auth.api.getSession({ headers: c.req.raw.headers });
 
-  if (!session) {
-    c.set("user", null);
-    c.set("session", null);
+  if (!betterAuth) {
+    c.set("auth", null);
     await next();
     return;
   }
 
-  c.set("user", session.user);
-  c.set("session", session);
+  c.set("auth", {
+    user: betterAuth.user,
+    session: betterAuth.session,
+  });
   await next();
 });
 

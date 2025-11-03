@@ -1,5 +1,5 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { Auth, Session, User } from "@repo/auth";
+import { Auth } from "@repo/auth";
 import { ExampleWorkflowRequestPayload } from "./workflows/example";
 
 export interface Bindings extends Auth {
@@ -8,8 +8,7 @@ export interface Bindings extends Auth {
 }
 
 export interface Variables {
-  user: User | null;
-  session: Session | null;
+  auth: Auth | null;
 }
 
 export const createRouter = () =>
