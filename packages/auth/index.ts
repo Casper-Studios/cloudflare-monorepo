@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { getDb } from "@repo/db";
 import * as schema from "@repo/db/schema";
+import { admin } from "better-auth/plugins";
 
 export async function createAuth(
   database: ReturnType<typeof getDb>,
@@ -30,6 +31,7 @@ export async function createAuth(
     emailAndPassword: {
       enabled: true,
     },
+    plugins: [admin()],
   });
 }
 
@@ -37,6 +39,4 @@ export type Auth = Awaited<ReturnType<typeof createAuth>>;
 
 // export type Auth = ReturnType<typeof initAuth>;
 export type Session = Auth["$Infer"]["Session"]["session"];
-export type User = Auth["$Infer"]["Session"]["user"] & {
-  role: "user" | "admin";
-};
+export type User = Auth["$Infer"]["Session"]["user"];

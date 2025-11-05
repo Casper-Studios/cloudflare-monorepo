@@ -3,10 +3,9 @@ import { appRouter } from "@repo/trpc/routers";
 import { createAuth, type Auth, type User } from "@repo/auth";
 import { createCallerFactory, createTRPCContext } from "@repo/trpc/lib";
 import { getDb } from "@repo/db";
-import { DrizzleD1Database } from "drizzle-orm/d1";
-import { schema } from "@/routes/admin/components/data-table";
 
-const createCaller = createCallerFactory(appRouter);
+const createCaller: ReturnType<typeof createCallerFactory> =
+  createCallerFactory(appRouter);
 
 declare module "react-router" {
   export interface AppLoadContext {
