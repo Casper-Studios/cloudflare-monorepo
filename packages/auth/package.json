@@ -7,9 +7,10 @@
     "@repo/db": "workspace:*"
   },
   "devDependencies": {
-    "@types/bun": "latest",
+    "@cloudflare/workers-types": "^4.20251014.0",
+    "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@repo/eslint-config": "workspace:*"
+    "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"

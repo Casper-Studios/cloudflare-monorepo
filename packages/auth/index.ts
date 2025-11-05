@@ -1,51 +1,40 @@
-import type { BetterAuthOptions } from "better-auth";
 import { betterAuth } from "better-auth";
-import { oAuthProxy } from "better-auth/plugins";
-import type { Database } from "@repo/db";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import type { D1Database } from "@cloudflare/workers-types";
+import { getDb } from "@repo/db";
+import * as schema from "@repo/db/schema";
 
-export function initAuth(
-  db: Database,
+export async function createAuth(
+  database: D1Database,
   options: {
-    baseUrl: string;
-    productionUrl: string;
-    secret: string | undefined;
+    // baseUrl: string;
+    productionUrl?: string;
+    secret: string;
   }
-): ReturnType<typeof betterAuth> {
-  const config = {
+) {
+  const db = await getDb(database);
+
+  return betterAuth({
     database: drizzleAdapter(db, {
       provider: "sqlite",
+      schema,
     }),
-    baseURL: options.baseUrl,
     secret: options.secret,
-    plugins: [
-      oAuthProxy({
-        productionURL: options.productionUrl,
-      }),
-    ],
-    trustedOrigins: [
-      "expo://",
-      "http://localhost:3001",
-      "http://localhost:3000",
-    ],
+    // trustedOrigins: [
+    //   "expo://",
+    //   "http://localhost:3001",
+    //   "http://localhost:3000",
+    // ],
     onAPIError: {
       onError(error, ctx) {
         console.error("BETTER AUTH API ERROR", error, ctx);
       },
     },
-    emailAndPassword: {
-      enabled: true,
-    },
-  } satisfies BetterAuthOptions;
-
-  return betterAuth(config);
+  });
 }
 
-export type Auth = {
-  user: ReturnType<typeof betterAuth>["$Infer"]["Session"]["user"] | null;
-  session: ReturnType<typeof betterAuth>["$Infer"]["Session"]["session"] | null;
-};
+export type Auth = Awaited<ReturnType<typeof createAuth>>;
 
 // export type Auth = ReturnType<typeof initAuth>;
-// export type Session = Auth["$Infer"]["Session"]["session"];
-// export type User = Auth["$Infer"]["Session"]["user"];
+export type Session = Auth["$Infer"]["Session"]["session"];
+export type User = Auth["$Infer"]["Session"]["user"];

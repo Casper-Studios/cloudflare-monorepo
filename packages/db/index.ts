@@ -1,8 +1,9 @@
-import { AnyD1Database, drizzle as drizzleD1 } from "drizzle-orm/d1";
+import { drizzle as drizzleD1 } from "drizzle-orm/d1";
+import type { D1Database } from "@cloudflare/workers-types";
 
 import * as schema from "./schema/index.js";
 
-export async function getDb(database: AnyD1Database) {
+export async function getDb(database: D1Database) {
   try {
     return drizzleD1(database, { schema, logger: true });
   } catch (err) {

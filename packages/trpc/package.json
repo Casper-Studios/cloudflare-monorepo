@@ -8,14 +8,18 @@
     "@repo/eslint-config": "workspace:*"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^5",
+    "react": "^19"
   },
   "dependencies": {
     "@repo/auth": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/repositories": "workspace:*",
+    "@tanstack/react-query": "^5.90.7",
+    "@trpc/client": "^11.7.1",
     "@trpc/react-query": "^11.7.1",
     "@trpc/server": "^11.7.1",
+    "drizzle-orm": "^0.44.7",
     "superjson": "^2.2.5",
     "zod": "^4.1.12"
   }

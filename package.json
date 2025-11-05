@@ -11,14 +11,19 @@
     "check-types": "turbo run check-types",
     "db:generate": "cd packages/db && bun run db:generate",
     "db:studio": "cd packages/db && bun run db:studio",
-    "db:copy-migrations": "rm -rf apps/server/migrations && cp -r packages/db/drizzle apps/server/migrations",
-    "db:migrate:local": "bun run db:copy-migrations && cd apps/server && wrangler d1 migrations apply my-database --local",
-    "db:migrate:remote": "bun run db:copy-migrations && cd apps/server && wrangler d1 migrations apply my-database --remote",
-    "db:list": "cd apps/server && wrangler d1 migrations list my-database --local",
+    "db:copy-migrations": "rm -rf apps/{{appName}}/migrations && cp -r packages/db/drizzle apps/{{appName}}/migrations",
+    "db:migrate:local": "bun run db:copy-migrations && cd apps/{{appName}} && wrangler d1 migrations apply react-router-test-db --local",
+    "db:migrate:remote": "bun run db:copy-migrations && cd apps/{{appName}} && wrangler d1 migrations apply react-router-test-db --remote",
+    "db:list": "cd apps/{{appName}} && wrangler d1 migrations list react-router-test-db --local",
     "ui-add": "turbo run ui-add"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251014.0",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
     "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "turbo": "^2.6.0",
     "typescript": "5.9.2"
   },
