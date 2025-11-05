@@ -1,5 +1,5 @@
 {
-  "name": "cf-monorepo",
+  "name": "{{projectName}}-monorepo",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -11,10 +11,6 @@
     "check-types": "turbo run check-types",
     "db:generate": "cd packages/db && bun run db:generate",
     "db:studio": "cd packages/db && bun run db:studio",
-    "db:copy-migrations": "rm -rf apps/{{appName}}/migrations && cp -r packages/db/drizzle apps/{{appName}}/migrations",
-    "db:migrate:local": "bun run db:copy-migrations && cd apps/{{appName}} && wrangler d1 migrations apply react-router-test-db --local",
-    "db:migrate:remote": "bun run db:copy-migrations && cd apps/{{appName}} && wrangler d1 migrations apply react-router-test-db --remote",
-    "db:list": "cd apps/{{appName}} && wrangler d1 migrations list react-router-test-db --local",
     "ui-add": "turbo run ui-add"
   },
   "devDependencies": {

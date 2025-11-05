@@ -1,4 +1,4 @@
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@repo/ui/sidebar";
 import { Outlet } from "react-router";
 import { AppSidebar } from "./layout/app-sidebar";
 

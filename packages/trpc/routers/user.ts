@@ -2,7 +2,6 @@ import { z } from "zod/v4";
 
 import { userRepository } from "@repo/repositories";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../lib";
-import { user } from "@repo/db/schema";
 
 export const userRouter = createTRPCRouter({
   // Public endpoint - anyone can view users

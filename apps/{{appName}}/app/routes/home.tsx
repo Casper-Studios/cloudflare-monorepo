@@ -2,10 +2,10 @@ import { Suspense } from "react";
 import { api } from "@/lib/trpc-provider";
 import type { Route } from "./+types/home";
 import { authClient } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@repo/ui/button";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
 
 export function meta({ loaderData }: Route.MetaArgs) {
   return [

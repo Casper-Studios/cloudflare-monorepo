@@ -6,7 +6,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@repo/ui/sidebar"
 import { Link, useLocation } from "react-router"
 import { cn } from "@/lib/utils"
 

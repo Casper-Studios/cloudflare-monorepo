@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Button } from "@repo/ui/button"
+import { Separator } from "@repo/ui/separator"
+import { SidebarTrigger } from "@repo/ui/sidebar"
 
 interface Props {
   title: string;

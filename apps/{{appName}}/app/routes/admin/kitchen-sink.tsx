@@ -1,8 +1,8 @@
 import { FileUpload } from "@/components/file-upload";
-import { Button } from "@/components/ui/button";
+import { Button } from "@repo/ui/button";
 import { api } from "@/lib/trpc-provider";
 import { SiteHeader } from "./layout/site-header";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@repo/ui/separator";
 
 
 export default function KitchenSink() {

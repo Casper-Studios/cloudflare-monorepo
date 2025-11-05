@@ -29,9 +29,8 @@ import { toast } from "sonner";
 import { useSearchParams, useRevalidator } from "react-router";
 
 import { authClient } from "@/lib/auth-client";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@repo/ui/button";
+import { Checkbox } from "@repo/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -40,16 +39,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@repo/ui/dropdown-menu";
+import { Input } from "@repo/ui/input";
+import { Label } from "@repo/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@repo/ui/select";
 import {
   Table,
   TableBody,
@@ -57,8 +56,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+} from "@repo/ui/table";
+import { Badge } from "@repo/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import type { User } from "@/db/schema";
 
 
