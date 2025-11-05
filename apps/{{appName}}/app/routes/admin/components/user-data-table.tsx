@@ -28,7 +28,7 @@ import {
 import { toast } from "sonner";
 import { useSearchParams, useRevalidator } from "react-router";
 
-import { authClient } from "@/auth/client";
+import { authClient } from "@/lib/auth-client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";

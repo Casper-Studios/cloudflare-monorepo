@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { api } from "@/lib/trpc-provider";
 import type { Route } from "./+types/home";
-import { authClient } from "@/auth/client";
+import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router";

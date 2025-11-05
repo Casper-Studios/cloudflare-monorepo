@@ -11,6 +11,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { z, ZodError } from "zod/v4";
 import type { Auth, Session, User } from "@repo/auth";
+import type { Database } from "@repo/db";
 
 /**
  * 1. CONTEXT
@@ -27,7 +28,7 @@ import type { Auth, Session, User } from "@repo/auth";
 
 export const createTRPCContext = async (opts: {
   headers: Headers;
-  database: D1Database;
+  database: Database;
   authApi: Auth["api"];
   auth: {
     session: Session;

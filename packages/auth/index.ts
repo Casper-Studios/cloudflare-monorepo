@@ -1,21 +1,18 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import type { D1Database } from "@cloudflare/workers-types";
 import { getDb } from "@repo/db";
 import * as schema from "@repo/db/schema";
 
 export async function createAuth(
-  database: D1Database,
+  database: ReturnType<typeof getDb>,
   options: {
     // baseUrl: string;
     productionUrl?: string;
     secret: string;
   }
 ) {
-  const db = await getDb(database);
-
   return betterAuth({
-    database: drizzleAdapter(db, {
+    database: drizzleAdapter(database, {
       provider: "sqlite",
       schema,
     }),
@@ -30,6 +27,9 @@ export async function createAuth(
         console.error("BETTER AUTH API ERROR", error, ctx);
       },
     },
+    emailAndPassword: {
+      enabled: true,
+    },
   });
 }
 
@@ -37,4 +37,6 @@ export type Auth = Awaited<ReturnType<typeof createAuth>>;
 
 // export type Auth = ReturnType<typeof initAuth>;
 export type Session = Auth["$Infer"]["Session"]["session"];
-export type User = Auth["$Infer"]["Session"]["user"];
+export type User = Auth["$Infer"]["Session"]["user"] & {
+  role: "user" | "admin";
+};

@@ -12,7 +12,5 @@
   "peerDependencies": {
     "typescript": "^5"
   },
-  "dependencies": {
-    "drizzle-orm": "^0.44.7"
-  }
+  "dependencies": {}
 }

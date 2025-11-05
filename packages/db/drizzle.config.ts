@@ -4,7 +4,9 @@ import path from "node:path";
 
 function getLocalD1DB() {
   try {
-    const basePath = path.resolve("../../apps/server/.wrangler");
+    const basePath = path.resolve(
+      "../../apps/{{appName}}/.wrangler/state/v3/d1"
+    );
     const files = fs
       .readdirSync(basePath, { encoding: "utf-8", recursive: true })
       .filter((f) => f.endsWith(".sqlite"))
@@ -31,6 +33,7 @@ function getLocalD1DB() {
     console.log(`Error  ${err}`);
   }
 }
+console.log(process.env.NODE_ENV);
 
 export default defineConfig({
   out: "./drizzle",

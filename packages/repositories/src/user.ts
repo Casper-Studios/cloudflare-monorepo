@@ -1,4 +1,4 @@
-import { eq, inArray, count, desc, or, like, and } from "drizzle-orm";
+import { drizzleOrm } from "@repo/db";
 import { user } from "@repo/db/schema";
 import {
   NotFoundError,
@@ -7,6 +7,9 @@ import {
   ValidationError,
 } from "@repo/schemas";
 import type { Database } from "@repo/db";
+import { DrizzleQueryError } from "drizzle-orm";
+
+const { eq, inArray, count, desc, or, like, and } = drizzleOrm;
 
 interface GetUsersInput {
   page: number;
@@ -76,6 +79,9 @@ export async function getUsers(db: Database, input: GetUsersInput) {
       totalPages: Math.ceil((totalCountResult[0]?.count ?? 0) / input.limit),
     };
   } catch (error) {
+    if (error instanceof DrizzleQueryError) {
+      console.error(error.message);
+    }
     throw new UpdateError("user", "Failed to retrieve users", error);
   }
 }
@@ -231,14 +237,13 @@ export async function updateUser(db: Database, input: UpdateUserInput) {
       .where(eq(user.id, input.userId))
       .limit(1);
 
-    if (targetUser.length === 0) {
+    const target = targetUser[0];
+
+    if (!target) {
       throw new NotFoundError("user", input.userId);
     }
 
-    if (
-      targetUser[0].role === "admin" ||
-      targetUser[0].id === input.currentUserId
-    ) {
+    if (target.role === "admin" || target.id === input.currentUserId) {
       throw new ValidationError(
         "user",
         "Cannot update admin users or yourself",
@@ -282,14 +287,13 @@ export async function banUser(db: Database, input: BanUserInput) {
       .where(eq(user.id, input.userId))
       .limit(1);
 
-    if (targetUser.length === 0) {
+    const target = targetUser[0];
+
+    if (!target) {
       throw new NotFoundError("user", input.userId);
     }
 
-    if (
-      targetUser[0].role === "admin" ||
-      targetUser[0].id === input.currentUserId
-    ) {
+    if (target.role === "admin" || target.id === input.currentUserId) {
       throw new ValidationError(
         "user",
         "Cannot ban admin users or yourself",
@@ -362,14 +366,13 @@ export async function deleteUser(db: Database, input: DeleteUserInput) {
       .where(eq(user.id, input.userId))
       .limit(1);
 
-    if (targetUser.length === 0) {
+    const target = targetUser[0];
+
+    if (!target) {
       throw new NotFoundError("user", input.userId);
     }
 
-    if (
-      targetUser[0].role === "admin" ||
-      targetUser[0].id === input.currentUserId
-    ) {
+    if (target.role === "admin" || target.id === input.currentUserId) {
       throw new ValidationError(
         "user",
         "Cannot delete admin users or yourself",

@@ -1,9 +1,8 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "@repo/typescript-config/base.json",
   "include": ["vite.config.ts"],
   "compilerOptions": {
     "composite": true,
-    "strict": true,
     "types": ["node"],
     "lib": ["ES2022"],
     "target": "ES2022",

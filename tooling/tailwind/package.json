@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    ".": "./index.js",
     "./theme": "./theme.css",
     "./theme.css": "./theme.css",
     "./postcss-config": "./postcss-config.js"

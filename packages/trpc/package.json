@@ -19,7 +19,6 @@
     "@trpc/client": "^11.7.1",
     "@trpc/react-query": "^11.7.1",
     "@trpc/server": "^11.7.1",
-    "drizzle-orm": "^0.44.7",
     "superjson": "^2.2.5",
     "zod": "^4.1.12"
   }
