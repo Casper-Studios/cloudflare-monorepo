@@ -145,7 +145,7 @@ function createWranglerJson(
         binding: "DATABASE",
         database_name: dbName,
         database_id: dbId,
-        migrations_dir: "./drizzle",
+        migrations_dir: "./migrations",
       },
     ],
     r2_buckets: [
