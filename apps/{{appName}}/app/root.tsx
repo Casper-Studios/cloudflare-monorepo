@@ -9,7 +9,6 @@ import {
 
 import type { Route } from "./+types/root";
 import { TRPCProvider } from "./lib/trpc-provider";
-import "@repo/tailwind-config/theme.css";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [

@@ -453,27 +453,33 @@ async function main() {
   }
   console.log("\x1b[32m✓ Authenticated with Cloudflare\x1b[0m");
 
-  // Step 1: Get project name and app name
+  // Step 1: Get project name
   console.log("\n\x1b[36m📝 Step 1: Project Configuration\x1b[0m");
   const defaultProjectName = sanitizeResourceName(path.basename(process.cwd()));
   const projectName = sanitizeResourceName(
     await prompt("Enter your project name", defaultProjectName)
   );
 
-  const defaultAppName = "{{appName}}";
-  const appName = await prompt("Enter your app name", defaultAppName);
+  // Use projectName as the app name
+  const appName = projectName;
 
   // Rename the app directory if needed
   const oldAppPath = path.join(__dirname, "..", "apps", "{{appName}}");
   const newAppPath = path.join(__dirname, "..", "apps", appName);
 
-  if (appName !== "{{appName}}" && fs.existsSync(oldAppPath)) {
+  if (fs.existsSync(oldAppPath)) {
     console.log(
       `\n\x1b[36mRenaming app directory from {{appName}} to ${appName}...\x1b[0m`
     );
     try {
       fs.renameSync(oldAppPath, newAppPath);
       console.log(`\x1b[32m✓ Directory renamed successfully\x1b[0m`);
+
+      // Update lockfile after renaming workspace
+      const lockfileSpinner = spinner();
+      lockfileSpinner.start("Updating lockfile...");
+      executeCommand("bun install", true);
+      lockfileSpinner.stop("\x1b[32m✓ Lockfile updated\x1b[0m");
     } catch (error) {
       console.error(`\x1b[31m✗ Failed to rename directory: ${error}\x1b[0m`);
       cancel("Operation cancelled.");
