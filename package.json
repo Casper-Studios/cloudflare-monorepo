@@ -11,10 +11,15 @@
     "check-types": "turbo run check-types",
     "db:generate": "cd packages/db && bun run db:generate",
     "db:studio": "cd packages/db && bun run db:studio",
-    "ui-add": "turbo run ui-add"
+    "ui-add": "turbo run ui-add",
+    "db:migrate:local": "turbo run db:migrate:local",
+    "db:migrate:remote": "turbo run db:migrate:remote",
+    "setup": "bun run scripts/first-time-setup.ts"
   },
   "devDependencies": {
+    "@clack/prompts": "^0.11.0",
     "@cloudflare/workers-types": "^4.20251014.0",
+    "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "prettier": "^3.6.2",

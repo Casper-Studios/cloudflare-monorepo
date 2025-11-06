@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, type DragEvent, type ChangeEvent } from "react";
 import { useFetcher } from "react-router";
-import { cn } from "@/lib/utils";
+import { cn } from "@repo/ui/lib/utils";
 import { Button } from "@repo/ui/button";
 import { Spinner } from "@repo/ui/spinner";
 import type { action } from "@/routes/api/upload-file";

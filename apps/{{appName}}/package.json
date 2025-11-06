@@ -13,7 +13,8 @@
     "typegen": "wrangler types && react-router typegen",
     "auth:generate": "bunx --bun @better-auth/cli generate --config auth.config.ts",
     "setup": "bun run scripts/first-time-setup.ts",
-    "db:migrate:local": "wrangler d1 migrations apply react-router-test-db --local"
+    "db:migrate:local": "wrangler d1 migrations apply {{dbName}} --local",
+    "db:migrate:remote": "wrangler d1 migrations apply {{dbName}} --remote"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

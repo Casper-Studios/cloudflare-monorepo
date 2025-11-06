@@ -22,9 +22,11 @@
       "cache": false
     },
     "db:migrate:local": {
+      "cache": false,
       "dependsOn": ["db:copy-migrations", "^db:migrate:local"]
     },
     "db:copy-migrations": {
+      "cache": false,
       "dependsOn": ["^db:copy-migrations"]
     },
     "ui-add": {

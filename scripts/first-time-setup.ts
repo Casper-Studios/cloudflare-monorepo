@@ -3,6 +3,7 @@ import { execSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   intro,
   outro,
@@ -12,6 +13,10 @@ import {
   confirm,
   cancel,
 } from "@clack/prompts";
+
+// Define __dirname for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function sanitizeResourceName(name: string): string {
   return name
@@ -73,9 +78,16 @@ function createWranglerJson(
   projectName: string,
   dbName: string,
   dbId: string,
-  bucketName: string
+  bucketName: string,
+  appName: string
 ) {
-  const wranglerJsonPath = path.join(__dirname, "..", "wrangler.jsonc");
+  const wranglerJsonPath = path.join(
+    __dirname,
+    "..",
+    "apps",
+    appName,
+    "wrangler.jsonc"
+  );
 
   const wranglerConfig = {
     name: projectName,
@@ -132,8 +144,14 @@ function createWranglerJson(
   console.log("\x1b[32m✓ Created wrangler.jsonc\x1b[0m");
 }
 
-function removeWranglerFromGitignore() {
-  const gitignorePath = path.join(__dirname, "..", ".gitignore");
+function removeWranglerFromGitignore(appName: string) {
+  const gitignorePath = path.join(
+    __dirname,
+    "..",
+    "apps",
+    appName,
+    ".gitignore"
+  );
 
   if (!fs.existsSync(gitignorePath)) {
     console.log("\x1b[33m⚠ .gitignore not found, skipping...\x1b[0m");
@@ -322,8 +340,8 @@ async function setupAuthentication(): Promise<{
   };
 }
 
-function createEnvFile(betterAuthSecret: string) {
-  const envPath = path.join(__dirname, "..", ".env");
+function createEnvFile(betterAuthSecret: string, appName: string) {
+  const envPath = path.join(__dirname, "..", "apps", appName, ".env");
 
   if (fs.existsSync(envPath)) {
     console.log("\x1b[33m⚠ .env already exists, skipping...\x1b[0m");
@@ -343,29 +361,41 @@ function createEnvFile(betterAuthSecret: string) {
   console.log("\x1b[32m✓ Created .env file\x1b[0m");
 }
 
-async function runDatabaseMigrations(dbName: string) {
+async function runDatabaseMigrations(dbName: string, appName: string) {
   console.log("\n\x1b[36m📦 Running database migrations...\x1b[0m");
+
+  const appPath = path.join(__dirname, "..", "apps", appName);
 
   const generateSpinner = spinner();
   generateSpinner.start("Generating migration...");
-  executeCommand("bunx drizzle-kit generate --name setup", true);
+  executeCommand(
+    `cd "${appPath}" && bunx drizzle-kit generate --name setup`,
+    true
+  );
   generateSpinner.stop("\x1b[32m✓ Migration generated\x1b[0m");
 
   const localSpinner = spinner();
   localSpinner.start("Applying local migrations...");
-  executeCommand(`bunx wrangler d1 migrations apply "${dbName}" --local`, true);
+  executeCommand(
+    `cd "${appPath}" && bunx wrangler d1 migrations apply "${dbName}" --local`,
+    true
+  );
   localSpinner.stop("\x1b[32m✓ Local migrations applied\x1b[0m");
 
   const remoteSpinner = spinner();
   remoteSpinner.start("Applying remote migrations...");
   executeCommand(
-    `bunx wrangler d1 migrations apply "${dbName}" --remote`,
+    `cd "${appPath}" && bunx wrangler d1 migrations apply "${dbName}" --remote`,
     true
   );
   remoteSpinner.stop("\x1b[32m✓ Remote migrations applied\x1b[0m");
 }
 
-async function uploadSecret(secretName: string, secretValue: string) {
+async function uploadSecret(
+  secretName: string,
+  secretValue: string,
+  appName: string
+) {
   if (!secretValue || secretValue === "") {
     console.log(`\x1b[33m⚠ Skipping ${secretName} (empty value)\x1b[0m`);
     return;
@@ -375,14 +405,15 @@ async function uploadSecret(secretName: string, secretValue: string) {
   secretSpinner.start(`Uploading ${secretName}...`);
 
   try {
-    const tempFile = path.join(__dirname, "..", `.temp-${secretName}`);
+    const appPath = path.join(__dirname, "..", "apps", appName);
+    const tempFile = path.join(appPath, `.temp-${secretName}`);
     fs.writeFileSync(tempFile, secretValue);
 
     try {
       const command =
         process.platform === "win32"
-          ? `type "${tempFile}" | wrangler secret put ${secretName}`
-          : `cat "${tempFile}" | wrangler secret put ${secretName}`;
+          ? `cd "${appPath}" && type ".temp-${secretName}" | wrangler secret put ${secretName}`
+          : `cd "${appPath}" && cat ".temp-${secretName}" | wrangler secret put ${secretName}`;
 
       const result = executeCommand(command, true);
 
@@ -422,12 +453,37 @@ async function main() {
   }
   console.log("\x1b[32m✓ Authenticated with Cloudflare\x1b[0m");
 
-  // Step 1: Get project name
+  // Step 1: Get project name and app name
   console.log("\n\x1b[36m📝 Step 1: Project Configuration\x1b[0m");
   const defaultProjectName = sanitizeResourceName(path.basename(process.cwd()));
   const projectName = sanitizeResourceName(
     await prompt("Enter your project name", defaultProjectName)
   );
+
+  const defaultAppName = "{{appName}}";
+  const appName = await prompt("Enter your app name", defaultAppName);
+
+  // Rename the app directory if needed
+  const oldAppPath = path.join(__dirname, "..", "apps", "{{appName}}");
+  const newAppPath = path.join(__dirname, "..", "apps", appName);
+
+  if (appName !== "{{appName}}" && fs.existsSync(oldAppPath)) {
+    console.log(
+      `\n\x1b[36mRenaming app directory from {{appName}} to ${appName}...\x1b[0m`
+    );
+    try {
+      fs.renameSync(oldAppPath, newAppPath);
+      console.log(`\x1b[32m✓ Directory renamed successfully\x1b[0m`);
+    } catch (error) {
+      console.error(`\x1b[31m✗ Failed to rename directory: ${error}\x1b[0m`);
+      cancel("Operation cancelled.");
+      process.exit(1);
+    }
+  } else if (!fs.existsSync(newAppPath)) {
+    console.error(`\x1b[31m✗ App directory not found at: ${newAppPath}\x1b[0m`);
+    cancel("Operation cancelled.");
+    process.exit(1);
+  }
 
   // Generate resource names based on project name
   const dbName = `${projectName}-db`;
@@ -435,6 +491,7 @@ async function main() {
   const kvName = `${projectName}-kv`;
 
   console.log("\n\x1b[33mResource names:\x1b[0m");
+  console.log(`  • App Directory: apps/${appName}`);
   console.log(`  • Project: ${projectName}`);
   console.log(`  • Database: ${dbName}`);
   console.log(`  • Bucket: ${bucketName}`);
@@ -483,27 +540,34 @@ async function main() {
   console.log("\n\x1b[36m🔐 Step 3: Authentication Setup\x1b[0m");
   const { betterAuthSecret } = await setupAuthentication();
 
-  createEnvFile(betterAuthSecret);
+  createEnvFile(betterAuthSecret, appName);
 
   // Step 4: Create configuration files
   console.log("\n\x1b[36m📝 Step 4: Creating Configuration Files\x1b[0m");
 
   // Create wrangler.jsonc from scratch
-  createWranglerJson(projectName, dbName, dbId, bucketName);
+  createWranglerJson(projectName, dbName, dbId, bucketName, appName);
 
   // Remove wrangler.jsonc from .gitignore since it's now configured
-  removeWranglerFromGitignore();
+  removeWranglerFromGitignore(appName);
 
-  // Update package.json with database name
-  const packageJsonPath = path.join(__dirname, "..", "package.json");
+  // Update package.json with database name (in the app directory)
+  const packageJsonPath = path.join(
+    __dirname,
+    "..",
+    "apps",
+    appName,
+    "package.json"
+  );
   const replacements = {
     projectName: sanitizeResourceName(projectName),
     dbName,
+    appName,
   };
   replaceHandlebarsInFile(packageJsonPath, replacements);
 
   // Step 5: Run database migrations
-  await runDatabaseMigrations(dbName);
+  await runDatabaseMigrations(dbName, appName);
 
   // Step 6: Optionally deploy secrets
   console.log("\n\x1b[36m🚀 Step 5: Deploy to Production (Optional)\x1b[0m");
@@ -515,7 +579,7 @@ async function main() {
   let secretsDeployed = false;
   if (shouldDeploySecrets) {
     console.log("\n\x1b[36mDeploying secrets...\x1b[0m");
-    await uploadSecret("BETTER_AUTH_SECRET", betterAuthSecret);
+    await uploadSecret("BETTER_AUTH_SECRET", betterAuthSecret, appName);
     secretsDeployed = true;
   } else {
     console.log(
@@ -535,16 +599,21 @@ async function main() {
     });
 
     if (shouldDeploy) {
+      const appPath = path.join(__dirname, "..", "apps", appName);
+
       // Build the application
       const buildSpinner = spinner();
       buildSpinner.start("Building application...");
-      const buildResult = executeCommand("bun run deploy", true);
+      const buildResult = executeCommand(
+        `cd "${appPath}" && bun run deploy`,
+        true
+      );
 
       if (buildResult && typeof buildResult === "object" && buildResult.error) {
         buildSpinner.stop("\x1b[31m✗ Build failed\x1b[0m");
         console.error(`\x1b[31m${buildResult.message}\x1b[0m`);
         console.log(
-          "\x1b[33mYou can build and deploy manually later with: bun run deploy\x1b[0m"
+          "\x1b[33mYou can build and deploy manually later with: cd apps/${appName} && bun run deploy\x1b[0m"
         );
       } else {
         buildSpinner.stop("\x1b[32m✓ Build completed\x1b[0m");
@@ -552,7 +621,10 @@ async function main() {
         // Deploy to Cloudflare
         const deploySpinner = spinner();
         deploySpinner.start("Deploying to Cloudflare Workers...");
-        const deployResult = executeCommand("bun run deploy", true);
+        const deployResult = executeCommand(
+          `cd "${appPath}" && bun run deploy`,
+          true
+        );
 
         if (
           deployResult &&
@@ -570,7 +642,7 @@ async function main() {
       }
     } else {
       console.log(
-        "\x1b[33m⚠ Skipped deployment. You can deploy later with: bun run deploy\x1b[0m"
+        "\x1b[33m⚠ Skipped deployment. You can deploy later with: cd apps/${appName} && bun run deploy\x1b[0m"
       );
     }
   }
@@ -581,15 +653,17 @@ async function main() {
 
   if (!secretsDeployed) {
     console.log("  1. For local development:");
-    console.log("     \x1b[33mbun run dev\x1b[0m\n");
+    console.log(`     \x1b[33mcd apps/${appName} && bun run dev\x1b[0m\n`);
     console.log("  2. Before deploying to production:");
     console.log(
-      "     • Deploy secrets: \x1b[33mwrangler secret put BETTER_AUTH_SECRET\x1b[0m"
+      `     • Deploy secrets: \x1b[33mcd apps/${appName} && wrangler secret put BETTER_AUTH_SECRET\x1b[0m`
     );
-    console.log("     • Run: \x1b[33mbun run deploy\x1b[0m\n");
+    console.log(
+      `     • Run: \x1b[33mcd apps/${appName} && bun run deploy\x1b[0m\n`
+    );
   } else {
     console.log("  1. For local development:");
-    console.log("     \x1b[33mbun run dev\x1b[0m\n");
+    console.log(`     \x1b[33mcd apps/${appName} && bun run dev\x1b[0m\n`);
     console.log("  2. Configure your production domain:");
     console.log("     • Configure R2 CORS policy for your domain\n");
   }

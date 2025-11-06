@@ -3,9 +3,9 @@ import { api } from "@/lib/trpc-provider";
 import type { Route } from "./+types/home";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@repo/ui/button";
-import { cn } from "@/lib/utils";
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
+import { cn } from "@repo/ui/lib/utils";
 
 export function meta({ loaderData }: Route.MetaArgs) {
   return [

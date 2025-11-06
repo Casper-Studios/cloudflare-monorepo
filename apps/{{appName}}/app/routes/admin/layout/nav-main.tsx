@@ -8,7 +8,7 @@ import {
   SidebarMenuItem,
 } from "@repo/ui/sidebar"
 import { Link, useLocation } from "react-router"
-import { cn } from "@/lib/utils"
+import { cn } from "@repo/ui/lib/utils"
 
 export function NavMain({
   items,
