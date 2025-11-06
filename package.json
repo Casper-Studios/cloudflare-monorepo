@@ -14,7 +14,8 @@
     "ui-add": "turbo run ui-add",
     "db:migrate:local": "turbo run db:migrate:local",
     "db:migrate:remote": "turbo run db:migrate:remote",
-    "setup": "bun run scripts/first-time-setup.ts"
+    "setup": "bun run scripts/first-time-setup.ts",
+    "deploy": "turbo run deploy"
   },
   "devDependencies": {
     "@clack/prompts": "^0.11.0",

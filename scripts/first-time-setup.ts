@@ -615,6 +615,19 @@ async function main() {
   };
   replaceHandlebarsInFile(packageJsonPath, replacements);
 
+  // Update packages/db/package.json with project name
+  const dbPackageJsonPath = path.join(
+    __dirname,
+    "..",
+    "packages",
+    "db",
+    "package.json"
+  );
+  const dbReplacements = {
+    projectName: sanitizeResourceName(projectName),
+  };
+  replaceHandlebarsInFile(dbPackageJsonPath, dbReplacements);
+
   // Regenerate lockfile with clean state
   console.log("\n\x1b[36m🔄 Regenerating lockfile...\x1b[0m");
   const bunLockPath = path.join(__dirname, "..", "bun.lock");
@@ -661,15 +674,10 @@ async function main() {
     });
 
     if (shouldDeploy) {
-      const appPath = path.join(__dirname, "..", "apps", appName);
-
       // Build the application
       const buildSpinner = spinner();
       buildSpinner.start("Building application...");
-      const buildResult = executeCommand(
-        `cd "${appPath}" && bun run deploy`,
-        true
-      );
+      const buildResult = executeCommand(`bun run deploy`, true);
 
       if (buildResult && typeof buildResult === "object" && buildResult.error) {
         buildSpinner.stop("\x1b[31m✗ Build failed\x1b[0m");
@@ -683,10 +691,7 @@ async function main() {
         // Deploy to Cloudflare
         const deploySpinner = spinner();
         deploySpinner.start("Deploying to Cloudflare Workers...");
-        const deployResult = executeCommand(
-          `cd "${appPath}" && bun run deploy`,
-          true
-        );
+        const deployResult = executeCommand(`bun run deploy`, true);
 
         if (
           deployResult &&
