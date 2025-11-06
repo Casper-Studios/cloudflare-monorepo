@@ -77,40 +77,83 @@ function replaceHandlebarsInFile(
 function replaceRepoReferences(projectName: string) {
   const repoScope = `@${projectName}`;
 
-  // Directories to search for package.json files
+  // Directories to search recursively
   const searchDirs = [
     path.join(__dirname, "..", "packages"),
     path.join(__dirname, "..", "tooling"),
     path.join(__dirname, "..", "apps"),
   ];
 
-  console.log("\n\x1b[36m📦 Updating package references...\x1b[0m");
+  // File extensions to process
+  const allowedExtensions = [
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx",
+    ".json",
+    ".mjs",
+    ".cjs",
+    ".css",
+  ];
 
-  for (const searchDir of searchDirs) {
-    if (!fs.existsSync(searchDir)) continue;
+  console.log(
+    `\n\x1b[36m📦 Updating @repo references to ${repoScope}...\x1b[0m`
+  );
 
-    const entries = fs.readdirSync(searchDir, { withFileTypes: true });
+  let filesUpdated = 0;
+
+  function processDirectory(dirPath: string) {
+    if (!fs.existsSync(dirPath)) return;
+
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
 
     for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
+      const fullPath = path.join(dirPath, entry.name);
 
-      const packageJsonPath = path.join(searchDir, entry.name, "package.json");
+      // Skip node_modules, .git, and hidden directories
+      if (entry.isDirectory()) {
+        if (
+          entry.name === "node_modules" ||
+          entry.name === ".git" ||
+          entry.name.startsWith(".")
+        ) {
+          continue;
+        }
+        processDirectory(fullPath);
+      } else if (entry.isFile()) {
+        const ext = path.extname(entry.name);
+        if (allowedExtensions.includes(ext)) {
+          try {
+            let content = fs.readFileSync(fullPath, "utf-8");
+            const originalContent = content;
 
-      if (fs.existsSync(packageJsonPath)) {
-        let content = fs.readFileSync(packageJsonPath, "utf-8");
-        const originalContent = content;
+            // Replace @repo with @projectName
+            content = content.replace(/@repo\//g, `${repoScope}/`);
 
-        // Replace @repo with @projectName
-        content = content.replace(/@repo\//g, `${repoScope}/`);
-
-        // Only write if content changed
-        if (content !== originalContent) {
-          fs.writeFileSync(packageJsonPath, content);
-          console.log(`\x1b[32m✓ Updated ${entry.name}/package.json\x1b[0m`);
+            // Only write if content changed
+            if (content !== originalContent) {
+              fs.writeFileSync(fullPath, content);
+              filesUpdated++;
+              const relativePath = path.relative(
+                path.join(__dirname, ".."),
+                fullPath
+              );
+              console.log(`\x1b[32m✓ Updated ${relativePath}\x1b[0m`);
+            }
+          } catch (error) {
+            // Skip files that can't be read (e.g., binary files)
+            continue;
+          }
         }
       }
     }
   }
+
+  for (const searchDir of searchDirs) {
+    processDirectory(searchDir);
+  }
+
+  console.log(`\x1b[32m✓ Updated ${filesUpdated} files\x1b[0m`);
 }
 
 function createWranglerJson(
