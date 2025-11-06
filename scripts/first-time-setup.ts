@@ -74,6 +74,45 @@ function replaceHandlebarsInFile(
   console.log(`\x1b[32m✓ Updated ${path.basename(filePath)}\x1b[0m`);
 }
 
+function replaceRepoReferences(projectName: string) {
+  const repoScope = `@${projectName}`;
+
+  // Directories to search for package.json files
+  const searchDirs = [
+    path.join(__dirname, "..", "packages"),
+    path.join(__dirname, "..", "tooling"),
+    path.join(__dirname, "..", "apps"),
+  ];
+
+  console.log("\n\x1b[36m📦 Updating package references...\x1b[0m");
+
+  for (const searchDir of searchDirs) {
+    if (!fs.existsSync(searchDir)) continue;
+
+    const entries = fs.readdirSync(searchDir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+
+      const packageJsonPath = path.join(searchDir, entry.name, "package.json");
+
+      if (fs.existsSync(packageJsonPath)) {
+        let content = fs.readFileSync(packageJsonPath, "utf-8");
+        const originalContent = content;
+
+        // Replace @repo with @projectName
+        content = content.replace(/@repo\//g, `${repoScope}/`);
+
+        // Only write if content changed
+        if (content !== originalContent) {
+          fs.writeFileSync(packageJsonPath, content);
+          console.log(`\x1b[32m✓ Updated ${entry.name}/package.json\x1b[0m`);
+        }
+      }
+    }
+  }
+}
+
 function createWranglerJson(
   projectName: string,
   dbName: string,
@@ -481,6 +520,9 @@ async function main() {
         projectName: sanitizeResourceName(projectName),
       };
       replaceHandlebarsInFile(rootPackageJsonPath, rootReplacements);
+
+      // Update all @repo references to use the project name
+      replaceRepoReferences(sanitizeResourceName(projectName));
     } catch (error) {
       console.error(`\x1b[31m✗ Failed to rename directory: ${error}\x1b[0m`);
       cancel("Operation cancelled.");
