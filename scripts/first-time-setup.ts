@@ -475,11 +475,12 @@ async function main() {
       fs.renameSync(oldAppPath, newAppPath);
       console.log(`\x1b[32m✓ Directory renamed successfully\x1b[0m`);
 
-      // Update lockfile after renaming workspace
-      const lockfileSpinner = spinner();
-      lockfileSpinner.start("Updating lockfile...");
-      executeCommand("bun install", true);
-      lockfileSpinner.stop("\x1b[32m✓ Lockfile updated\x1b[0m");
+      // Update root package.json with project name
+      const rootPackageJsonPath = path.join(__dirname, "..", "package.json");
+      const rootReplacements = {
+        projectName: sanitizeResourceName(projectName),
+      };
+      replaceHandlebarsInFile(rootPackageJsonPath, rootReplacements);
     } catch (error) {
       console.error(`\x1b[31m✗ Failed to rename directory: ${error}\x1b[0m`);
       cancel("Operation cancelled.");
@@ -571,6 +572,19 @@ async function main() {
     appName,
   };
   replaceHandlebarsInFile(packageJsonPath, replacements);
+
+  // Regenerate lockfile with clean state
+  console.log("\n\x1b[36m🔄 Regenerating lockfile...\x1b[0m");
+  const bunLockPath = path.join(__dirname, "..", "bun.lock");
+  if (fs.existsSync(bunLockPath)) {
+    fs.unlinkSync(bunLockPath);
+    console.log("\x1b[32m✓ Removed old lockfile\x1b[0m");
+  }
+
+  const installSpinner = spinner();
+  installSpinner.start("Regenerating lockfile...");
+  executeCommand("bun install", true);
+  installSpinner.stop("\x1b[32m✓ Lockfile regenerated\x1b[0m");
 
   // Step 5: Run database migrations
   await runDatabaseMigrations(dbName, appName);
