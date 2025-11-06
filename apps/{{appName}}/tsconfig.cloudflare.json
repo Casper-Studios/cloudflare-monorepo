@@ -7,7 +7,8 @@
     "app/**/.client/**/*",
     "workers/**/*",
     "workflows/**/*",
-    "worker-configuration.d.ts"
+    "worker-configuration.d.ts",
+    // "../../packages/ui/src/**/*"
   ],
   "compilerOptions": {
     "composite": true,
