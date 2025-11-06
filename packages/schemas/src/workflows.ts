@@ -1,5 +1,4 @@
-import { z } from "zod";
-
-export const unused = z.object({
-  // Not used yet, since everything is typed by trpc
-});
+export interface ExampleWorkflowRequestPayload {
+  email: string;
+  metadata: Record<string, string>;
+}

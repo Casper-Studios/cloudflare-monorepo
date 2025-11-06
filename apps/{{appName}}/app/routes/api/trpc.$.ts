@@ -30,6 +30,9 @@ const handler = async (req: Request, context: AppLoadContext) => {
               user: authSession.user as User & { role: "user" | "admin" },
             }
           : null,
+        workflows: {
+          ExampleWorkflow: context.cloudflare.env.EXAMPLE_WORKFLOW,
+        },
       }),
     onError({ error, path }) {
       console.error(`>>> tRPC Error on '${path}'`, error);

@@ -1,11 +1,10 @@
 import { createRequestHandler } from "react-router";
-import { appRouter } from "@repo/trpc/routers";
+import { AppRouter, appRouter } from "@repo/trpc/routers";
 import { createAuth, type Auth, type User } from "@repo/auth";
 import { createCallerFactory, createTRPCContext } from "@repo/trpc/lib";
 import { getDb } from "@repo/db";
 
-const createCaller: ReturnType<typeof createCallerFactory> =
-  createCallerFactory(appRouter);
+const createCaller = createCallerFactory(appRouter);
 
 declare module "react-router" {
   export interface AppLoadContext {
@@ -29,11 +28,6 @@ export default {
   async fetch(request, env, ctx) {
     const database = getDb(env.DATABASE);
 
-    // const result = await database.query.user.findMany({
-    //   limit: 100,
-    // });
-    // console.log(result);
-
     const auth = await createAuth(database, {
       secret: env.BETTER_AUTH_SECRET,
     });
@@ -48,10 +42,13 @@ export default {
       auth: session
         ? {
             session: session.session,
-            user: session.user as User & { role: "user" | "admin" },
+            user: session.user,
           }
         : null,
       authApi: auth.api,
+      workflows: {
+        ExampleWorkflow: env.EXAMPLE_WORKFLOW,
+      },
     });
 
     const trpcCaller = createCaller(trpcContext);

@@ -1,12 +1,14 @@
 import { FileUpload } from "@/components/file-upload";
+
 import { Button } from "@repo/ui/button";
 import { api } from "@/lib/trpc-provider";
-import { SiteHeader } from "./layout/site-header";
 import { Separator } from "@repo/ui/separator";
+
+import { SiteHeader } from "./layout/site-header";
 
 
 export default function KitchenSink() {
-  const createWorkflowMutation = api.user.createWorkflow.useMutation();
+  const createWorkflowMutation = api.admin.createWorkflow.useMutation();
   return (
     <div>
       <SiteHeader title="Kitchen Sink" />

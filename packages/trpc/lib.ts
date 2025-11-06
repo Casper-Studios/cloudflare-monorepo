@@ -11,6 +11,8 @@ import superjson from "superjson";
 import { z, ZodError } from "zod/v4";
 import type { Auth, Session, User } from "@repo/auth";
 import type { Database } from "@repo/db";
+import { Workflow } from "@cloudflare/workers-types";
+import { ExampleWorkflowRequestPayload } from "@repo/schemas";
 
 /**
  * 1. CONTEXT
@@ -33,16 +35,16 @@ export const createTRPCContext = async (opts: {
     session: Session;
     user: User;
   } | null;
-  // workflows: {
-  //   ExampleWorkflow: ExampleWorkflow;
-  // }
+  workflows: {
+    ExampleWorkflow: Workflow<ExampleWorkflowRequestPayload>;
+  };
 }) => {
   return {
     headers: opts.headers,
     authApi: opts.authApi,
     auth: opts.auth,
     database: opts.database,
-    // workflows: opts.workflows,
+    workflows: opts.workflows,
   };
 };
 /**

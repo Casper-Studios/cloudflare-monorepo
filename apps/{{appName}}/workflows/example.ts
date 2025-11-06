@@ -1,13 +1,10 @@
+import { ExampleWorkflowRequestPayload } from "@repo/schemas";
 import {
   WorkflowEntrypoint,
   WorkflowStep,
   type WorkflowEvent,
 } from "cloudflare:workers";
 
-export interface ExampleWorkflowRequestPayload {
-  email: string;
-  metadata: Record<string, string>;
-}
 // Note:
 // Unfortunately with the current version of the Cloudflare Workers SDK.
 // We can only test with `bun run preview` since that is the only time

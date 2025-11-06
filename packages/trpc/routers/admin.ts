@@ -197,4 +197,20 @@ export const adminRouter = createTRPCRouter({
         skippedCount,
       };
     }),
+
+  createWorkflow: adminProcedure
+    .input(
+      z.object({
+        email: z.string().email(),
+        metadata: z.record(z.string(), z.string()),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.workflows.ExampleWorkflow.create({
+        params: {
+          email: input.email,
+          metadata: input.metadata,
+        },
+      });
+    }),
 });

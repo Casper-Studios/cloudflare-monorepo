@@ -15,6 +15,7 @@
     "@repo/auth": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/repositories": "workspace:*",
+    "@repo/schemas": "workspace:*",
     "@tanstack/react-query": "^5.90.7",
     "@trpc/client": "^11.7.1",
     "@trpc/react-query": "^11.7.1",
