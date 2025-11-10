@@ -24,7 +24,7 @@ function getUrl() {
     // TODO:- Get the correct URL from the environment variables
     // if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
 
-    return 'http://localhost:5173';
+    return 'http://localhost:3000';
   })();
   return `${base}/api/trpc`;
 }

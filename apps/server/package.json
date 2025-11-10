@@ -1,12 +1,12 @@
 {
-  "name": "{{projectName}}",
+  "name": "server",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "react-router build",
     "cf-typegen": "wrangler types",
     "deploy": "bun run build && wrangler deploy",
-    "dev": "bun run db:migrate:local && react-router dev",
+    "dev": "bun run db:migrate:local && react-router dev --port 3000",
     "postinstall": "npm run cf-typegen",
     "preview": "bun run build && vite preview",
     "typecheck": "npm run cf-typegen && react-router typegen && tsc -b",
