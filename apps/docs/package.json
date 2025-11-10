@@ -23,6 +23,7 @@
     "nextra-theme-docs": "^4.6.0"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.5.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@types/node": "^22.15.3",
