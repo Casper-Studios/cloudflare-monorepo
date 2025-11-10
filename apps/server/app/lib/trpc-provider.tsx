@@ -21,10 +21,8 @@ function getQueryClient() {
 function getUrl() {
   const base = (() => {
     if (typeof window !== 'undefined') return '';
-    // TODO:- Get the correct URL from the environment variables
-    // if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-
-    return 'http://localhost:3000';
+    // For SSR, use the configured public URL or fallback to localhost
+    return import.meta.env.VITE_PUBLIC_URL || 'http://localhost:3000';
   })();
   return `${base}/api/trpc`;
 }

@@ -9,6 +9,7 @@ import superjson from 'superjson';
 
 import type { AppRouter } from '@jurni/trpc/routers/index.js';
 import { makeQueryClient } from '@jurni/trpc/query-client';
+import { mobileEnv } from '../../../env';
 import { authClient } from './auth';
 
 export const api = createTRPCReact<AppRouter>();
@@ -20,8 +21,7 @@ function getQueryClient() {
 }
 
 function getUrl() {
-
-  return `http://localhost:3000/api/trpc`;
+  return `${mobileEnv.EXPO_PUBLIC_API_URL}/api/trpc`;
 }
 
 export function TRPCProvider(props: PropsWithChildren) {

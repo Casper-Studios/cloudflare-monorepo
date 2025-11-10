@@ -443,6 +443,30 @@ function createEnvFile(betterAuthSecret: string, appName: string) {
   console.log("\x1b[32m✓ Created .env file\x1b[0m");
 }
 
+function createRootEnvFile(betterAuthSecret: string) {
+  const envPath = path.join(__dirname, "..", ".env");
+
+  if (fs.existsSync(envPath)) {
+    console.log("\x1b[33m⚠ Root .env already exists, skipping...\x1b[0m");
+    return;
+  }
+
+  const content = [
+    `# Server App - Public URL (for client-side SSR)`,
+    `VITE_PUBLIC_URL=http://localhost:3000`,
+    ``,
+    `# Expo Mobile App - Server URL`,
+    `EXPO_PUBLIC_API_URL=http://localhost:3000`,
+    ``,
+    `# Better Auth Secret (for local development)`,
+    `BETTER_AUTH_SECRET=${betterAuthSecret}`,
+    "",
+  ].join("\n");
+
+  fs.writeFileSync(envPath, content);
+  console.log("\x1b[32m✓ Created root .env file\x1b[0m");
+}
+
 async function runDatabaseMigrations(dbName: string, appName: string) {
   console.log("\n\x1b[36m📦 Running database migrations...\x1b[0m");
 
@@ -635,6 +659,7 @@ async function main() {
   const { betterAuthSecret } = await setupAuthentication();
 
   createEnvFile(betterAuthSecret, serverAppName);
+  createRootEnvFile(betterAuthSecret);
 
   // Step 4: Create configuration files
   console.log("\n\x1b[36m📝 Step 4: Creating Configuration Files\x1b[0m");
