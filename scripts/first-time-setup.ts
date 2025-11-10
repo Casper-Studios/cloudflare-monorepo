@@ -18,6 +18,45 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Parse command line arguments
+const args = process.argv.slice(2);
+const isCleanupMode = args.includes("--cleanup") || args.includes("--delete");
+const showHelp = args.includes("--help") || args.includes("-h");
+
+// Show help and exit
+if (showHelp) {
+  console.log(`
+\x1b[36m🚀 Cloudflare SaaS Stack - First-Time Setup\x1b[0m
+
+\x1b[33mUSAGE:\x1b[0m
+  bun run scripts/first-time-setup.ts [OPTIONS]
+
+\x1b[33mOPTIONS:\x1b[0m
+  (none)              Run the setup wizard to create Cloudflare resources
+  --cleanup, --delete Delete all Cloudflare resources for your project
+  --help, -h          Show this help message
+
+\x1b[33mEXAMPLES:\x1b[0m
+  # Run the first-time setup
+  bun run scripts/first-time-setup.ts
+
+  # Delete all resources
+  bun run scripts/first-time-setup.ts --cleanup
+
+\x1b[33mDESCRIPTION:\x1b[0m
+  This script helps you set up or tear down your Cloudflare infrastructure:
+  
+  • D1 Database (SQL database)
+  • R2 Bucket (object storage)
+  • KV Namespace (key-value store, optional)
+  • Workflows (serverless workflows)
+  • Local configuration files (.env, wrangler.jsonc)
+
+  The cleanup mode will safely delete all these resources after confirmation.
+`);
+  process.exit(0);
+}
+
 function sanitizeResourceName(name: string): string {
   return name
     .toLowerCase()
@@ -565,6 +604,351 @@ async function uploadSecret(
   }
 }
 
+// Cleanup functions
+async function listD1Databases(): Promise<
+  Array<{ name: string; uuid: string }>
+> {
+  try {
+    const output = executeCommand("wrangler d1 list --json", true);
+    if (output && typeof output === "string") {
+      const databases = JSON.parse(output);
+      return databases.map((db: any) => ({
+        name: db.name,
+        uuid: db.uuid,
+      }));
+    }
+  } catch (error) {
+    console.log(
+      "\x1b[33m⚠ Could not list D1 databases (try without --json)\x1b[0m"
+    );
+  }
+  return [];
+}
+
+async function listR2Buckets(): Promise<string[]> {
+  try {
+    const output = executeCommand("wrangler r2 bucket list", true);
+    if (output && typeof output === "string") {
+      // Parse the output to extract bucket names
+      const lines = output.split("\n");
+      const buckets: string[] = [];
+      for (const line of lines) {
+        // Look for lines that appear to be bucket names (simple heuristic)
+        const trimmed = line.trim();
+        if (
+          trimmed &&
+          !trimmed.includes("│") &&
+          !trimmed.includes("─") &&
+          !trimmed.includes("Bucket")
+        ) {
+          buckets.push(trimmed);
+        }
+      }
+      return buckets;
+    }
+  } catch (error) {
+    console.log("\x1b[33m⚠ Could not list R2 buckets\x1b[0m");
+  }
+  return [];
+}
+
+async function listKVNamespaces(): Promise<
+  Array<{ id: string; title: string }>
+> {
+  try {
+    const output = executeCommand("wrangler kv namespace list", true);
+    if (output && typeof output === "string") {
+      const namespaces = JSON.parse(output);
+      return namespaces.map((ns: any) => ({
+        id: ns.id,
+        title: ns.title,
+      }));
+    }
+  } catch (error) {
+    console.log("\x1b[33m⚠ Could not list KV namespaces\x1b[0m");
+  }
+  return [];
+}
+
+async function deleteDatabase(dbName: string): Promise<boolean> {
+  const dbSpinner = spinner();
+  dbSpinner.start(`Deleting D1 database: ${dbName}...`);
+
+  const result = executeCommand(
+    `wrangler d1 delete ${dbName} --skip-confirmation`,
+    true
+  );
+
+  if (result && typeof result === "object" && result.error) {
+    dbSpinner.stop(`\x1b[31m✗ Failed to delete database: ${dbName}\x1b[0m`);
+    return false;
+  }
+
+  dbSpinner.stop(`\x1b[32m✓ Deleted database: ${dbName}\x1b[0m`);
+  return true;
+}
+
+async function deleteBucket(bucketName: string): Promise<boolean> {
+  const bucketSpinner = spinner();
+  bucketSpinner.start(`Deleting R2 bucket: ${bucketName}...`);
+
+  const result = executeCommand(
+    `wrangler r2 bucket delete ${bucketName}`,
+    true
+  );
+
+  if (result && typeof result === "object" && result.error) {
+    bucketSpinner.stop(
+      `\x1b[31m✗ Failed to delete bucket: ${bucketName}\x1b[0m`
+    );
+    return false;
+  }
+
+  bucketSpinner.stop(`\x1b[32m✓ Deleted bucket: ${bucketName}\x1b[0m`);
+  return true;
+}
+
+async function deleteKVNamespace(
+  kvId: string,
+  kvTitle: string
+): Promise<boolean> {
+  const kvSpinner = spinner();
+  kvSpinner.start(`Deleting KV namespace: ${kvTitle}...`);
+
+  const result = executeCommand(
+    `wrangler kv namespace delete --namespace-id=${kvId}`,
+    true
+  );
+
+  if (result && typeof result === "object" && result.error) {
+    kvSpinner.stop(
+      `\x1b[31m✗ Failed to delete KV namespace: ${kvTitle}\x1b[0m`
+    );
+    return false;
+  }
+
+  kvSpinner.stop(`\x1b[32m✓ Deleted KV namespace: ${kvTitle}\x1b[0m`);
+  return true;
+}
+
+async function deleteWorkflow(workflowName: string): Promise<boolean> {
+  const workflowSpinner = spinner();
+  workflowSpinner.start(`Deleting Workflow: ${workflowName}...`);
+
+  const result = executeCommand(
+    `wrangler workflows delete ${workflowName}`,
+    true
+  );
+
+  if (result && typeof result === "object" && result.error) {
+    workflowSpinner.stop(
+      `\x1b[33m⚠ Could not delete workflow: ${workflowName}\x1b[0m`
+    );
+    return false;
+  }
+
+  workflowSpinner.stop(`\x1b[32m✓ Deleted workflow: ${workflowName}\x1b[0m`);
+  return true;
+}
+
+// Cleanup main function
+async function cleanupResources() {
+  intro("🧹 Cloudflare SaaS Stack - Resource Cleanup");
+
+  // Check if wrangler is authenticated
+  console.log("\n\x1b[36mChecking Wrangler authentication...\x1b[0m");
+  const whoamiOutput = executeCommand("wrangler whoami", true);
+
+  if (
+    !whoamiOutput ||
+    typeof whoamiOutput !== "string" ||
+    whoamiOutput.includes("not authenticated")
+  ) {
+    console.error(
+      "\x1b[31m✗ Not logged in. Please run `wrangler login` first.\x1b[0m"
+    );
+    cancel("Operation cancelled.");
+    process.exit(1);
+  }
+  console.log("\x1b[32m✓ Authenticated with Cloudflare\x1b[0m");
+
+  // Get project name
+  console.log("\n\x1b[36m📝 Project Configuration\x1b[0m");
+  const defaultProjectName = sanitizeResourceName(path.basename(process.cwd()));
+  const projectName = sanitizeResourceName(
+    await prompt(
+      "Enter your project name (to identify resources)",
+      defaultProjectName
+    )
+  );
+
+  // Generate expected resource names
+  const dbName = `${projectName}-db`;
+  const bucketName = `${projectName}-bucket`;
+  const kvName = `${projectName}-kv`;
+  const workflowName = `${projectName}-example-workflow`;
+
+  console.log("\n\x1b[36m🔍 Scanning for resources...\x1b[0m");
+
+  // List all resources
+  const databases = await listD1Databases();
+  const buckets = await listR2Buckets();
+  const kvNamespaces = await listKVNamespaces();
+
+  // Filter resources that match the project
+  const matchingDB = databases.find((db) => db.name === dbName);
+  const matchingBucket = buckets.includes(bucketName);
+  const matchingKV = kvNamespaces.find((kv) => kv.title === kvName);
+
+  console.log("\n\x1b[33mResources found for project '${projectName}':\x1b[0m");
+
+  let foundResources = false;
+
+  if (matchingDB) {
+    console.log(`  • D1 Database: ${dbName} (${matchingDB.uuid})`);
+    foundResources = true;
+  } else {
+    console.log(`  • D1 Database: ${dbName} \x1b[90m(not found)\x1b[0m`);
+  }
+
+  if (matchingBucket) {
+    console.log(`  • R2 Bucket: ${bucketName}`);
+    foundResources = true;
+  } else {
+    console.log(`  • R2 Bucket: ${bucketName} \x1b[90m(not found)\x1b[0m`);
+  }
+
+  if (matchingKV) {
+    console.log(`  • KV Namespace: ${kvName} (${matchingKV.id})`);
+    foundResources = true;
+  } else {
+    console.log(`  • KV Namespace: ${kvName} \x1b[90m(not found)\x1b[0m`);
+  }
+
+  console.log(
+    `  • Workflow: ${workflowName} \x1b[90m(will attempt deletion)\x1b[0m`
+  );
+
+  if (!foundResources) {
+    console.log("\n\x1b[33m⚠ No resources found to delete.\x1b[0m");
+    outro("Cleanup complete.");
+    process.exit(0);
+  }
+
+  // Confirm deletion
+  console.log(
+    "\n\x1b[31m⚠️  WARNING: This will permanently delete the resources listed above!\x1b[0m"
+  );
+  const shouldDelete = await confirm({
+    message: "Are you sure you want to delete these resources?",
+    initialValue: false,
+  });
+
+  if (!shouldDelete) {
+    cancel("Cleanup cancelled.");
+    process.exit(0);
+  }
+
+  // Double confirmation for safety
+  const doubleConfirm = await confirm({
+    message: "This action cannot be undone. Proceed with deletion?",
+    initialValue: false,
+  });
+
+  if (!doubleConfirm) {
+    cancel("Cleanup cancelled.");
+    process.exit(0);
+  }
+
+  console.log("\n\x1b[36m🗑️  Deleting resources...\x1b[0m");
+
+  let deletedCount = 0;
+
+  // Delete D1 Database
+  if (matchingDB) {
+    const deleted = await deleteDatabase(dbName);
+    if (deleted) deletedCount++;
+  }
+
+  // Delete R2 Bucket
+  if (matchingBucket) {
+    const deleted = await deleteBucket(bucketName);
+    if (deleted) deletedCount++;
+  }
+
+  // Delete KV Namespace
+  if (matchingKV) {
+    const deleted = await deleteKVNamespace(matchingKV.id, kvName);
+    if (deleted) deletedCount++;
+  }
+
+  // Delete Workflow (attempt, may not exist)
+  await deleteWorkflow(workflowName);
+
+  // Optionally delete local configuration files
+  console.log("\n\x1b[36m📁 Local Configuration Files\x1b[0m");
+  const shouldDeleteLocal = await confirm({
+    message: "Delete local wrangler.jsonc and .env files?",
+    initialValue: false,
+  });
+
+  if (shouldDeleteLocal) {
+    const serverAppName = "server";
+    const docsAppName = "docs";
+
+    // Delete server wrangler.jsonc
+    const serverWranglerPath = path.join(
+      __dirname,
+      "..",
+      "apps",
+      serverAppName,
+      "wrangler.jsonc"
+    );
+    if (fs.existsSync(serverWranglerPath)) {
+      fs.unlinkSync(serverWranglerPath);
+      console.log("\x1b[32m✓ Deleted apps/server/wrangler.jsonc\x1b[0m");
+    }
+
+    // Delete docs wrangler.json
+    const docsWranglerPath = path.join(
+      __dirname,
+      "..",
+      "apps",
+      docsAppName,
+      "wrangler.json"
+    );
+    if (fs.existsSync(docsWranglerPath)) {
+      fs.unlinkSync(docsWranglerPath);
+      console.log("\x1b[32m✓ Deleted apps/docs/wrangler.json\x1b[0m");
+    }
+
+    // Delete server .env
+    const serverEnvPath = path.join(
+      __dirname,
+      "..",
+      "apps",
+      serverAppName,
+      ".env"
+    );
+    if (fs.existsSync(serverEnvPath)) {
+      fs.unlinkSync(serverEnvPath);
+      console.log("\x1b[32m✓ Deleted apps/server/.env\x1b[0m");
+    }
+
+    // Delete root .env
+    const rootEnvPath = path.join(__dirname, "..", ".env");
+    if (fs.existsSync(rootEnvPath)) {
+      fs.unlinkSync(rootEnvPath);
+      console.log("\x1b[32m✓ Deleted root .env\x1b[0m");
+    }
+  }
+
+  console.log(
+    `\n\x1b[32m✅ Cleanup complete! Deleted ${deletedCount} Cloudflare resources.\x1b[0m`
+  );
+  outro("✨ Resources cleaned up successfully!");
+}
+
 // Main setup function
 async function main() {
   intro("🚀 Cloudflare SaaS Stack - First-Time Setup");
@@ -946,7 +1330,15 @@ async function main() {
   outro("✨ Happy building! 🎉");
 }
 
-main().catch((error) => {
-  console.error("\x1b[31mUnexpected error:\x1b[0m", error);
-  process.exit(1);
-});
+// Entry point - route to cleanup or setup based on flag
+if (isCleanupMode) {
+  cleanupResources().catch((error) => {
+    console.error("\x1b[31mUnexpected error:\x1b[0m", error);
+    process.exit(1);
+  });
+} else {
+  main().catch((error) => {
+    console.error("\x1b[31mUnexpected error:\x1b[0m", error);
+    process.exit(1);
+  });
+}
