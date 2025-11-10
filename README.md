@@ -305,7 +305,7 @@ EXPO_PUBLIC_API_URL=https://your-worker.workers.dev  # Production
 
 The `docs` app uses Nextra for a beautiful documentation site. Add MDX files to `apps/docs/app/` and they'll automatically be added to the navigation.
 
-## 🧪 Testing
+## 🧪 Testing & Linting
 
 ```bash
 # Run tests across all packages
@@ -314,12 +314,30 @@ bun test
 # Type checking
 bun run check-types
 
-# Linting
+# Linting (all packages/apps use unified configs from /tooling)
 bun run lint
 
 # Format code
 bun run format
 ```
+
+### ESLint & TypeScript Configuration
+
+This monorepo uses centralized ESLint and TypeScript configurations from the `/tooling` directory:
+
+- **`tooling/eslint-config/`** - Unified ESLint configurations:
+  - `base.js` - Base config for all packages
+  - `next-js.js` - Next.js applications (docs)
+  - `react-internal.js` - React component libraries (ui)
+  - `react-native.js` - React Native/Expo apps (mobile, server)
+
+- **`tooling/typescript-config/`** - Unified TypeScript configurations:
+  - `base.json` - Base TypeScript config
+  - `nextjs.json` - Next.js applications
+  - `react.json` - React applications
+  - `react-library.json` - React component libraries
+
+All apps and packages automatically inherit these configurations and follow consistent linting and type-checking standards.
 
 ## 📦 Adding Dependencies
 
