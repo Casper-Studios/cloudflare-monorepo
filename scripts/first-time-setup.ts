@@ -542,70 +542,41 @@ async function main() {
     await prompt("Enter your project name", defaultProjectName)
   );
 
-  // Use projectName as the app name
-  const appName = projectName;
+  // Fixed app names - no longer need to rename directories
+  const serverAppName = "server";
+  const mobileAppName = "mobile";
 
-  // Rename the app directory if needed
-  const oldAppPath = path.join(__dirname, "..", "apps", "{{appName}}");
-  const newAppPath = path.join(__dirname, "..", "apps", appName);
-
-  if (fs.existsSync(oldAppPath)) {
-    console.log(
-      `\n\x1b[36mRenaming app directory from {{appName}} to ${appName}...\x1b[0m`
+  // Verify the server directory exists
+  const serverAppPath = path.join(__dirname, "..", "apps", serverAppName);
+  if (!fs.existsSync(serverAppPath)) {
+    console.error(
+      `\x1b[31m✗ Server directory not found at: ${serverAppPath}\x1b[0m`
     );
-    try {
-      fs.renameSync(oldAppPath, newAppPath);
-      console.log(`\x1b[32m✓ Directory renamed successfully\x1b[0m`);
-
-      // Update root package.json with project name
-      const rootPackageJsonPath = path.join(__dirname, "..", "package.json");
-      const rootReplacements = {
-        projectName: sanitizeResourceName(projectName),
-      };
-      replaceHandlebarsInFile(rootPackageJsonPath, rootReplacements);
-
-      // Update all @repo references to use the project name
-      replaceRepoReferences(sanitizeResourceName(projectName));
-    } catch (error) {
-      console.error(`\x1b[31m✗ Failed to rename directory: ${error}\x1b[0m`);
-      cancel("Operation cancelled.");
-      process.exit(1);
-    }
-  } else if (!fs.existsSync(newAppPath)) {
-    console.error(`\x1b[31m✗ App directory not found at: ${newAppPath}\x1b[0m`);
     cancel("Operation cancelled.");
     process.exit(1);
   }
 
-  // Rename the mobile app directory if needed
-  const oldMobileAppPath = path.join(
-    __dirname,
-    "..",
-    "apps",
-    "{{appName}}-mobile"
-  );
-  const newMobileAppPath = path.join(
-    __dirname,
-    "..",
-    "apps",
-    `${appName}-mobile`
-  );
-
-  if (fs.existsSync(oldMobileAppPath)) {
-    console.log(
-      `\n\x1b[36mRenaming mobile app directory from {{appName}}-mobile to ${appName}-mobile...\x1b[0m`
+  // Verify the mobile directory exists
+  const mobileAppPath = path.join(__dirname, "..", "apps", mobileAppName);
+  if (!fs.existsSync(mobileAppPath)) {
+    console.error(
+      `\x1b[31m✗ Mobile directory not found at: ${mobileAppPath}\x1b[0m`
     );
-    try {
-      fs.renameSync(oldMobileAppPath, newMobileAppPath);
-      console.log(`\x1b[32m✓ Mobile directory renamed successfully\x1b[0m`);
-    } catch (error) {
-      console.error(
-        `\x1b[31m✗ Failed to rename mobile directory: ${error}\x1b[0m`
-      );
-      cancel("Operation cancelled.");
-      process.exit(1);
-    }
+    cancel("Operation cancelled.");
+    process.exit(1);
   }
+
+  console.log("\x1b[32m✓ Found server and mobile app directories\x1b[0m");
+
+  // Update root package.json with project name
+  const rootPackageJsonPath = path.join(__dirname, "..", "package.json");
+  const rootReplacements = {
+    projectName: sanitizeResourceName(projectName),
+  };
+  replaceHandlebarsInFile(rootPackageJsonPath, rootReplacements);
+
+  // Update all @repo references to use the project name
+  replaceRepoReferences(sanitizeResourceName(projectName));
 
   // Generate resource names based on project name
   const dbName = `${projectName}-db`;
@@ -613,7 +584,8 @@ async function main() {
   const kvName = `${projectName}-kv`;
 
   console.log("\n\x1b[33mResource names:\x1b[0m");
-  console.log(`  • App Directory: apps/${appName}`);
+  console.log(`  • Server Directory: apps/${serverAppName}`);
+  console.log(`  • Mobile Directory: apps/${mobileAppName}`);
   console.log(`  • Project: ${projectName}`);
   console.log(`  • Database: ${dbName}`);
   console.log(`  • Bucket: ${bucketName}`);
@@ -662,29 +634,29 @@ async function main() {
   console.log("\n\x1b[36m🔐 Step 3: Authentication Setup\x1b[0m");
   const { betterAuthSecret } = await setupAuthentication();
 
-  createEnvFile(betterAuthSecret, appName);
+  createEnvFile(betterAuthSecret, serverAppName);
 
   // Step 4: Create configuration files
   console.log("\n\x1b[36m📝 Step 4: Creating Configuration Files\x1b[0m");
 
   // Create wrangler.jsonc from scratch
-  createWranglerJson(projectName, dbName, dbId, bucketName, appName);
+  createWranglerJson(projectName, dbName, dbId, bucketName, serverAppName);
 
   // Remove wrangler.jsonc from .gitignore since it's now configured
-  removeWranglerFromGitignore(appName);
+  removeWranglerFromGitignore(serverAppName);
 
-  // Update package.json with database name (in the app directory)
+  // Update package.json with database name (in the server directory)
   const packageJsonPath = path.join(
     __dirname,
     "..",
     "apps",
-    appName,
+    serverAppName,
     "package.json"
   );
   const replacements = {
     projectName: sanitizeResourceName(projectName),
     dbName,
-    appName,
+    appName: serverAppName,
   };
   replaceHandlebarsInFile(packageJsonPath, replacements);
 
@@ -702,8 +674,6 @@ async function main() {
   replaceHandlebarsInFile(dbPackageJsonPath, dbReplacements);
 
   // Update mobile app files with project name
-  const mobileAppName = `${appName}-mobile`;
-
   const mobilePackageJsonPath = path.join(
     __dirname,
     "..",
@@ -776,7 +746,7 @@ async function main() {
   installSpinner.stop("\x1b[32m✓ Lockfile regenerated\x1b[0m");
 
   // Step 5: Run database migrations
-  await runDatabaseMigrations(dbName, appName);
+  await runDatabaseMigrations(dbName, serverAppName);
 
   // Step 6: Optionally deploy secrets
   console.log("\n\x1b[36m🚀 Step 5: Deploy to Production (Optional)\x1b[0m");
@@ -788,7 +758,7 @@ async function main() {
   let secretsDeployed = false;
   if (shouldDeploySecrets) {
     console.log("\n\x1b[36mDeploying secrets...\x1b[0m");
-    await uploadSecret("BETTER_AUTH_SECRET", betterAuthSecret, appName);
+    await uploadSecret("BETTER_AUTH_SECRET", betterAuthSecret, serverAppName);
     secretsDeployed = true;
   } else {
     console.log(
@@ -817,7 +787,7 @@ async function main() {
         buildSpinner.stop("\x1b[31m✗ Build failed\x1b[0m");
         console.error(`\x1b[31m${buildResult.message}\x1b[0m`);
         console.log(
-          "\x1b[33mYou can build and deploy manually later with: cd apps/${appName} && bun run deploy\x1b[0m"
+          `\x1b[33mYou can build and deploy manually later with: cd apps/${serverAppName} && bun run deploy\x1b[0m`
         );
       } else {
         buildSpinner.stop("\x1b[32m✓ Build completed\x1b[0m");
@@ -843,7 +813,7 @@ async function main() {
       }
     } else {
       console.log(
-        "\x1b[33m⚠ Skipped deployment. You can deploy later with: cd apps/${appName} && bun run deploy\x1b[0m"
+        `\x1b[33m⚠ Skipped deployment. You can deploy later with: cd apps/${serverAppName} && bun run deploy\x1b[0m`
       );
     }
   }
@@ -854,17 +824,21 @@ async function main() {
 
   if (!secretsDeployed) {
     console.log("  1. For local development:");
-    console.log(`     \x1b[33mcd apps/${appName} && bun run dev\x1b[0m\n`);
+    console.log(
+      `     \x1b[33mcd apps/${serverAppName} && bun run dev\x1b[0m\n`
+    );
     console.log("  2. Before deploying to production:");
     console.log(
-      `     • Deploy secrets: \x1b[33mcd apps/${appName} && wrangler secret put BETTER_AUTH_SECRET\x1b[0m`
+      `     • Deploy secrets: \x1b[33mcd apps/${serverAppName} && wrangler secret put BETTER_AUTH_SECRET\x1b[0m`
     );
     console.log(
-      `     • Run: \x1b[33mcd apps/${appName} && bun run deploy\x1b[0m\n`
+      `     • Run: \x1b[33mcd apps/${serverAppName} && bun run deploy\x1b[0m\n`
     );
   } else {
     console.log("  1. For local development:");
-    console.log(`     \x1b[33mcd apps/${appName} && bun run dev\x1b[0m\n`);
+    console.log(
+      `     \x1b[33mcd apps/${serverAppName} && bun run dev\x1b[0m\n`
+    );
     console.log("  2. Configure your production domain:");
     console.log("     • Configure R2 CORS policy for your domain\n");
   }
