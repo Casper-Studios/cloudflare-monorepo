@@ -8,11 +8,10 @@
     "start": "next start",
     "lint": "eslint --max-warnings 0",
     "check-types": "next typegen && tsc --noEmit",
-    "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
+    "postbuild": "pagefind --site out --output-path out/_pagefind",
     "build": "next build",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "preview": "wrangler pages dev out",
+    "deploy": "next build && wrangler pages deploy out --project-name=wassup-docs",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
@@ -23,12 +22,12 @@
     "nextra-theme-docs": "^4.6.0"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "^1.5.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@types/node": "^22.15.3",
     "eslint": "^9.38.0",
     "pagefind": "^1.4.0",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "wrangler": "^4.0.0"
   }
 }
