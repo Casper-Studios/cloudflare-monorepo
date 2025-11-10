@@ -4,9 +4,7 @@ import path from "node:path";
 
 function getLocalD1DB() {
   try {
-    const basePath = path.resolve(
-      "../../apps/{{appName}}/.wrangler/state/v3/d1"
-    );
+    const basePath = path.resolve("../../apps/server/.wrangler/state/v3/d1");
     const files = fs
       .readdirSync(basePath, { encoding: "utf-8", recursive: true })
       .filter((f) => f.endsWith(".sqlite"))

@@ -1,7 +1,7 @@
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { getDb } from "@expo-with-mobile/db";
-import * as schema from "@expo-with-mobile/db/schema";
+import { getDb } from "@repo/db";
+import * as schema from "@repo/db/schema";
 import { admin } from "better-auth/plugins";
 import { expo } from "@better-auth/expo";
 import type { D1Database } from "@cloudflare/workers-types";
@@ -22,7 +22,7 @@ export async function createAuth(database: D1Database, secret: string) {
       schema,
     }),
     secret,
-    trustedOrigins: ["expo-with-mobile://"],
+    trustedOrigins: ["{{projectName}}://"],
     onAPIError: {
       onError(error, ctx) {
         console.error("BETTER AUTH API ERROR", error, ctx);
