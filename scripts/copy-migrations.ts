@@ -6,20 +6,12 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Get the app name from environment variable or command line argument
-const appName = process.env.APP_NAME || process.argv[2];
+// Static app name - server is the only app that uses migrations
+const appName = "server";
 
-if (!appName) {
-  console.error(
-    "❌ Error: APP_NAME environment variable or app name argument is required"
-  );
-  console.error("Usage: bun run copy-migrations.ts <app-name>");
-  console.error("   or: APP_NAME=<app-name> bun run copy-migrations.ts");
-  process.exit(1);
-}
-
-const sourceDir = join(__dirname, "drizzle");
-const targetDir = join(__dirname, "..", "..", "apps", appName, "migrations");
+// Paths relative to monorepo root
+const sourceDir = join(__dirname, "..", "packages", "db", "drizzle");
+const targetDir = join(__dirname, "..", "apps", appName, "migrations");
 
 // Check if source directory exists
 if (!existsSync(sourceDir)) {
@@ -28,7 +20,7 @@ if (!existsSync(sourceDir)) {
 }
 
 // Check if app directory exists
-const appDir = join(__dirname, "..", "..", "apps", appName);
+const appDir = join(__dirname, "..", "apps", appName);
 if (!existsSync(appDir)) {
   console.error(`❌ Error: App directory not found: ${appDir}`);
   console.error(`   Looking for: ${appDir}`);
@@ -70,5 +62,3 @@ try {
   console.error(`❌ Error copying migrations:`, error);
   process.exit(1);
 }
-
-

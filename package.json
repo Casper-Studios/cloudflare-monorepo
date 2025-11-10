@@ -11,6 +11,7 @@
     "check-types": "turbo run check-types",
     "db:generate": "cd packages/db && bun run db:generate",
     "db:studio": "cd packages/db && bun run db:studio",
+    "db:copy-migrations": "bun run scripts/copy-migrations.ts",
     "ui-add": "turbo run ui-add",
     "db:migrate:local": "turbo run db:migrate:local",
     "db:migrate:remote": "turbo run db:migrate:remote",
