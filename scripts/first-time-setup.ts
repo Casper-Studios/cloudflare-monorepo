@@ -226,6 +226,33 @@ function createWranglerJson(
   console.log("\x1b[32m✓ Created wrangler.jsonc\x1b[0m");
 }
 
+function createDocsWranglerJson(projectName: string, appName: string) {
+  const wranglerJsonPath = path.join(
+    __dirname,
+    "..",
+    "apps",
+    appName,
+    "wrangler.json"
+  );
+
+  const wranglerConfig = {
+    $schema: "node_modules/wrangler/config-schema.json",
+    main: ".open-next/worker.js",
+    name: `${projectName}-docs`,
+    compatibility_date: "2025-03-25",
+    compatibility_flags: ["nodejs_compat", "global_fetch_strictly_public"],
+    assets: {
+      directory: ".open-next/assets",
+      binding: "ASSETS",
+    },
+  };
+
+  const jsonContent = JSON.stringify(wranglerConfig, null, 2) + "\n";
+
+  fs.writeFileSync(wranglerJsonPath, jsonContent);
+  console.log("\x1b[32m✓ Created docs wrangler.json\x1b[0m");
+}
+
 function removeWranglerFromGitignore(appName: string) {
   const gitignorePath = path.join(
     __dirname,
@@ -569,6 +596,7 @@ async function main() {
   // Fixed app names - no longer need to rename directories
   const serverAppName = "server";
   const mobileAppName = "mobile";
+  const docsAppName = "docs";
 
   // Verify the server directory exists
   const serverAppPath = path.join(__dirname, "..", "apps", serverAppName);
@@ -590,7 +618,19 @@ async function main() {
     process.exit(1);
   }
 
-  console.log("\x1b[32m✓ Found server and mobile app directories\x1b[0m");
+  // Verify the docs directory exists
+  const docsAppPath = path.join(__dirname, "..", "apps", docsAppName);
+  if (!fs.existsSync(docsAppPath)) {
+    console.error(
+      `\x1b[31m✗ Docs directory not found at: ${docsAppPath}\x1b[0m`
+    );
+    cancel("Operation cancelled.");
+    process.exit(1);
+  }
+
+  console.log(
+    "\x1b[32m✓ Found server, mobile, and docs app directories\x1b[0m"
+  );
 
   // Update root package.json with project name
   const rootPackageJsonPath = path.join(__dirname, "..", "package.json");
@@ -610,6 +650,7 @@ async function main() {
   console.log("\n\x1b[33mResource names:\x1b[0m");
   console.log(`  • Server Directory: apps/${serverAppName}`);
   console.log(`  • Mobile Directory: apps/${mobileAppName}`);
+  console.log(`  • Docs Directory: apps/${docsAppName}`);
   console.log(`  • Project: ${projectName}`);
   console.log(`  • Database: ${dbName}`);
   console.log(`  • Bucket: ${bucketName}`);
@@ -669,6 +710,9 @@ async function main() {
 
   // Remove wrangler.jsonc from .gitignore since it's now configured
   removeWranglerFromGitignore(serverAppName);
+
+  // Create docs wrangler.json
+  createDocsWranglerJson(projectName, docsAppName);
 
   // Update package.json with database name (in the server directory)
   const packageJsonPath = path.join(
@@ -794,51 +838,70 @@ async function main() {
   // Step 7: Optionally build and deploy the worker
   if (secretsDeployed) {
     console.log(
-      "\n\x1b[36m🚀 Step 6: Build and Deploy Worker (Optional)\x1b[0m"
+      "\n\x1b[36m🚀 Step 6: Build and Deploy Server Worker (Optional)\x1b[0m"
     );
 
     const shouldDeploy = await confirm({
-      message: "Build and deploy the worker to Cloudflare now?",
+      message: "Build and deploy the server worker to Cloudflare now?",
       initialValue: false,
     });
 
     if (shouldDeploy) {
-      // Build the application
+      // Build and deploy the application
       const buildSpinner = spinner();
-      buildSpinner.start("Building application...");
-      const buildResult = executeCommand(`bun run deploy`, true);
+      buildSpinner.start("Building and deploying server...");
+      const buildResult = executeCommand(
+        `cd apps/${serverAppName} && bun run deploy`,
+        true
+      );
 
       if (buildResult && typeof buildResult === "object" && buildResult.error) {
-        buildSpinner.stop("\x1b[31m✗ Build failed\x1b[0m");
+        buildSpinner.stop("\x1b[31m✗ Build/Deploy failed\x1b[0m");
         console.error(`\x1b[31m${buildResult.message}\x1b[0m`);
         console.log(
           `\x1b[33mYou can build and deploy manually later with: cd apps/${serverAppName} && bun run deploy\x1b[0m`
         );
       } else {
-        buildSpinner.stop("\x1b[32m✓ Build completed\x1b[0m");
-
-        // Deploy to Cloudflare
-        const deploySpinner = spinner();
-        deploySpinner.start("Deploying to Cloudflare Workers...");
-        const deployResult = executeCommand(`bun run deploy`, true);
-
-        if (
-          deployResult &&
-          typeof deployResult === "object" &&
-          deployResult.error
-        ) {
-          deploySpinner.stop("\x1b[31m✗ Deployment failed\x1b[0m");
-          console.error(`\x1b[31m${deployResult.message}\x1b[0m`);
-        } else {
-          deploySpinner.stop("\x1b[32m✓ Deployed successfully! 🎉\x1b[0m");
-          console.log(
-            "\n\x1b[36mYour application is now live on Cloudflare!\x1b[0m"
-          );
-        }
+        buildSpinner.stop("\x1b[32m✓ Server deployed successfully! 🎉\x1b[0m");
       }
     } else {
       console.log(
-        `\x1b[33m⚠ Skipped deployment. You can deploy later with: cd apps/${serverAppName} && bun run deploy\x1b[0m`
+        `\x1b[33m⚠ Skipped server deployment. You can deploy later with: cd apps/${serverAppName} && bun run deploy\x1b[0m`
+      );
+    }
+
+    // Step 8: Optionally build and deploy the docs app
+    console.log("\n\x1b[36m📚 Step 7: Build and Deploy Docs (Optional)\x1b[0m");
+
+    const shouldDeployDocs = await confirm({
+      message: "Build and deploy the docs to Cloudflare Pages now?",
+      initialValue: false,
+    });
+
+    if (shouldDeployDocs) {
+      // Build and deploy the docs
+      const docsSpinner = spinner();
+      docsSpinner.start("Building and deploying docs...");
+      const docsResult = executeCommand(
+        `cd apps/${docsAppName} && bun run deploy`,
+        true
+      );
+
+      if (docsResult && typeof docsResult === "object" && docsResult.error) {
+        docsSpinner.stop("\x1b[31m✗ Docs build/deploy failed\x1b[0m");
+        console.error(`\x1b[31m${docsResult.message}\x1b[0m`);
+        console.log(
+          `\x1b[33mYou can build and deploy manually later with: cd apps/${docsAppName} && bun run deploy\x1b[0m`
+        );
+      } else {
+        docsSpinner.stop("\x1b[32m✓ Docs deployed successfully! 📚\x1b[0m");
+        console.log(
+          "\n\x1b[36mYour documentation is now live on Cloudflare!\x1b[0m"
+        );
+      }
+    } else {
+      console.log(
+        `\x1b[33m⚠ Skipped docs deployment. You can deploy later with: cd apps/${docsAppName} && bun run deploy\x1b[0m`
       );
     }
   }
@@ -850,22 +913,34 @@ async function main() {
   if (!secretsDeployed) {
     console.log("  1. For local development:");
     console.log(
-      `     \x1b[33mcd apps/${serverAppName} && bun run dev\x1b[0m\n`
+      `     • Server: \x1b[33mcd apps/${serverAppName} && bun run dev\x1b[0m`
+    );
+    console.log(
+      `     • Docs: \x1b[33mcd apps/${docsAppName} && bun run dev\x1b[0m\n`
     );
     console.log("  2. Before deploying to production:");
     console.log(
       `     • Deploy secrets: \x1b[33mcd apps/${serverAppName} && wrangler secret put BETTER_AUTH_SECRET\x1b[0m`
     );
     console.log(
-      `     • Run: \x1b[33mcd apps/${serverAppName} && bun run deploy\x1b[0m\n`
+      `     • Deploy server: \x1b[33mcd apps/${serverAppName} && bun run deploy\x1b[0m`
+    );
+    console.log(
+      `     • Deploy docs: \x1b[33mcd apps/${docsAppName} && bun run deploy\x1b[0m\n`
     );
   } else {
     console.log("  1. For local development:");
     console.log(
-      `     \x1b[33mcd apps/${serverAppName} && bun run dev\x1b[0m\n`
+      `     • Server: \x1b[33mcd apps/${serverAppName} && bun run dev\x1b[0m`
     );
-    console.log("  2. Configure your production domain:");
-    console.log("     • Configure R2 CORS policy for your domain\n");
+    console.log(
+      `     • Docs: \x1b[33mcd apps/${docsAppName} && bun run dev\x1b[0m\n`
+    );
+    console.log("  2. Production configuration:");
+    console.log("     • Configure R2 CORS policy for your domain");
+    console.log(
+      `     • Deploy docs anytime: \x1b[33mcd apps/${docsAppName} && bun run deploy\x1b[0m\n`
+    );
   }
 
   outro("✨ Happy building! 🎉");
